@@ -12,6 +12,11 @@ Test
 Wrist*
 Butt*
 *loacl
+# Files relevant to CMAKE for local version
+CMakeFiles/*
+CMakeCache.txt
+cmake_install.cmake
+Makefile
 
 
 # nix lang ignores

@@ -1,28 +1,22 @@
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <HTTPClient.h>
-#include <LV_Helper.h>
-#include <LilyGo_AMOLED.h>
-#include <TFT_eSPI.h>
-#include <WiFi.h>
+#include <HAL.h>
 #include <lvgl.h>
 #include <time.h>
 
 // Wi-Fi credentials (Delete these before commiting to GitHub)
-static const char *WIFI_SSID = "SSID";
-static const char *WIFI_PASSWORD = "PWD";
+static const char* WIFI_SSID = "SSID";
+static const char* WIFI_PASSWORD = "PWD";
 
 LilyGo_Class amoled;
 
-static lv_obj_t *tileview;
-static lv_obj_t *t1;
-static lv_obj_t *t2;
-static lv_obj_t *t1_label;
-static lv_obj_t *t2_label;
-static bool t2_dark = false; // start tile #2 in light mode
+static lv_obj_t* tileview;
+static lv_obj_t* t1;
+static lv_obj_t* t2;
+static lv_obj_t* t1_label;
+static lv_obj_t* t2_label;
+static bool t2_dark = false;  // start tile #2 in light mode
 
 // Function: Tile #2 Color change
-static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
+static void apply_tile_colors(lv_obj_t* tile, lv_obj_t* label, bool dark) {
   // Background
   lv_obj_set_style_bg_opa(tile, LV_OPA_COVER, 0);
   lv_obj_set_style_bg_color(tile, dark ? lv_color_black() : lv_color_white(),
@@ -33,7 +27,7 @@ static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
                               0);
 }
 
-static void on_tile2_clicked(lv_event_t *e) {
+static void on_tile2_clicked(lv_event_t* e) {
   LV_UNUSED(e);
   t2_dark = !t2_dark;
   apply_tile_colors(t2, t2_label, t2_dark);
@@ -103,7 +97,7 @@ void setup() {
       delay(1000);
   }
 
-  beginLvglHelperDMA(amoled); // init LVGL for this board
+  beginLvglHelperDMA(amoled);  // init LVGL for this board
 
   create_ui();
   connect_wifi();

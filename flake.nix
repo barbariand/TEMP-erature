@@ -13,7 +13,8 @@
     in {
       devShells.default = with pkgs;
         mkShell {
-          packages = with pkgs; [platformio arduino-cli arduino-language-server clang-tools];
+          natiiveBuildInputs = [SDL];
+          packages = with pkgs; [cmake platformio arduino-cli arduino-language-server clang-tools];
           shellHook = ''
           '';
         };

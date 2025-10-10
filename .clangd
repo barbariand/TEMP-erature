@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-I, "./hal/", -I, "./libdeps/lvgl/"]
