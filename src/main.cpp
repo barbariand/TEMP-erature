@@ -24,6 +24,14 @@ static lv_obj_t *img1;
 LV_IMG_DECLARE(rackstar);
 static bool t2_dark = false; // start tile #2 in light mode
 
+static int16_t angle = 0;
+
+void rotate_img_cb(lv_timer_t * timer) {
+    angle += 100;                    // rotate 1°
+    if(angle > 36000) angle = 0;     // reset after 360°
+    lv_img_set_angle(img1, angle);
+}
+
 
 // Function: Tile #2 Color change
 static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
@@ -82,6 +90,9 @@ static void create_ui() {
     img1 = lv_img_create(t3);
     lv_img_set_src(img1,&rackstar);
     lv_obj_center(img1);
+    //lv_obj_set_x(img1,lv_pct(50));
+
+    lv_timer_create(rotate_img_cb, 10, NULL); 
   }
 
 }
