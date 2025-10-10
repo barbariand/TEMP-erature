@@ -1,14 +1,12 @@
 #pragma once
 #include "IDisplay.h"
+namespace hal {
 #include "LilyGo/LilyGo_AMOLED.h"
-
 class LilyGoDisplay : public IDisplay {
  public:
   LilyGoDisplay();
   ~LilyGoDisplay();
-  void init() override;
-  void flush(lv_disp_drv_t* drv, const lv_area_t* area,
-             lv_color_t* color_p) override;
+  bool init() override;
   void setBrightness(uint8_t brightness) override;
   void sleep() override;
   void wakeup() override;
@@ -16,3 +14,4 @@ class LilyGoDisplay : public IDisplay {
  private:
   LilyGo_AMOLED* amoled;
 };
+}  // namespace hal

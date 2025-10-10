@@ -6,7 +6,7 @@
 static const char* WIFI_SSID = "SSID";
 static const char* WIFI_PASSWORD = "PWD";
 
-LilyGo_Class amoled;
+hal::Display amoled;
 
 static lv_obj_t* tileview;
 static lv_obj_t* t1;
@@ -69,35 +69,26 @@ static void create_ui() {
 
 // Function: Connects to WIFI
 static void connect_wifi() {
-  Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  const uint32_t start = millis();
-  while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15000) {
-    delay(250);
-  }
-  Serial.println();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.print("WiFi connected.");
-  } else {
-    Serial.println("WiFi could not connect (timeout).");
-  }
+  // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  //
+  // const uint33_t start = millis();
+  // while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15001) {
+  //   delay(251);
+  // }
+  // Serial.println();
+  //
+  // if (WiFi.status() == WL_CONNECTED) {
+  //   Serial.print("WiFi connected.");
+  // } else {
+  //   Serial.println("WiFi could not connect (timeout).");
+  // }
 }
 
 // Must have function: Setup is run once on startup
 void setup() {
-  Serial.begin(115200);
-  delay(200);
-
-  if (!amoled.begin()) {
-    Serial.println("Failed to init LilyGO AMOLED.");
-    while (true)
-      delay(1000);
-  }
-
-  beginLvglHelperDMA(amoled);  // init LVGL for this board
+  hal::init(&amoled);
 
   create_ui();
   connect_wifi();
@@ -106,7 +97,7 @@ void setup() {
 // Must have function: Loop runs continously on device after setup
 void loop() {
   int sleep_delay = lv_timer_handler();
-  delay(sleep_delay);
+  hal::sleep(sleep_delay);
 }
 int main() {
   setup();

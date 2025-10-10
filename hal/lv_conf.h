@@ -42,34 +42,47 @@
 #define LV_COLOR_CHROMA_KEY lv_color_hex(0x00ff00)         /*pure green*/
 
 /*=========================
-   MEMORY SETTINGS
+    MEMORY SETTINGS
  *=========================*/
 
-/*1: use custom malloc/free, 0: use the built-in `lv_mem_alloc()` and `lv_mem_free()`*/
-#define LV_MEM_CUSTOM 1
-#if LV_MEM_CUSTOM == 0
-/*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-#define LV_MEM_SIZE (48U * 1024U)          /*[bytes]*/
+#if defined(SDL_BUILD)
+    /* --- Settings for SDL/Linux Build --- */
+    /* 0: use the built-in `lv_mem_alloc()` and `lv_mem_free()`*/
+    #define LV_MEM_CUSTOM 0
+    #if LV_MEM_CUSTOM == 0
+        /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
+        /* Increased to 128KB for desktop, 48KB is small */
+        #define LV_MEM_SIZE (128U * 1024U)      /*[bytes]*/
+        #define LV_MEM_ADR 0     /*0: unused*/
+        #if LV_MEM_ADR == 0
+            #undef LV_MEM_POOL_INCLUDE
+            #undef LV_MEM_POOL_ALLOC
+        #endif
+    #endif
 
-/*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
-#define LV_MEM_ADR 0     /*0: unused*/
-/*Instead of an address give a memory allocator that will be called to get a memory pool for LVGL. E.g. my_malloc*/
-#if LV_MEM_ADR == 0
-#undef LV_MEM_POOL_INCLUDE
-#undef LV_MEM_POOL_ALLOC
+#else
+    /* --- Settings for ESP32 Build --- */
+    /*1: use custom malloc/free (for PSRAM) */
+    #define LV_MEM_CUSTOM 1
+    #if LV_MEM_CUSTOM == 0
+        /* This block is ignored on ESP32 */
+        #define LV_MEM_SIZE (48U * 1024U)       /*[bytes]*/
+        #define LV_MEM_ADR 0     /*0: unused*/
+        #if LV_MEM_ADR == 0
+            #undef LV_MEM_POOL_INCLUDE
+            #undef LV_MEM_POOL_ALLOC
+        #endif
+    #else     /*LV_MEM_CUSTOM*/
+        #define LV_MEM_CUSTOM_INCLUDE <esp32-hal-psram.h>   /*Header for the dynamic memory function*/
+        #define LV_MEM_CUSTOM_ALLOC   ps_malloc
+        #define LV_MEM_CUSTOM_FREE    free
+        #define LV_MEM_CUSTOM_REALLOC ps_realloc
+    #endif    /*LV_MEM_CUSTOM*/
 #endif
-
-#else       /*LV_MEM_CUSTOM*/
-#define LV_MEM_CUSTOM_INCLUDE <esp32-hal-psram.h>   /*Header for the dynamic memory function*/
-#define LV_MEM_CUSTOM_ALLOC   ps_malloc
-#define LV_MEM_CUSTOM_FREE    free
-#define LV_MEM_CUSTOM_REALLOC ps_realloc
-#endif     /*LV_MEM_CUSTOM*/
 
 /*Number of the intermediate memory buffer used during rendering and other internal processing mechanisms.
  *You will see an error log message if there wasn't enough buffers. */
 #define LV_MEM_BUF_MAX_NUM 16
-
 /*Use the standard `memcpy` and `memset` instead of LVGL's own functions. (Might or might not be faster).*/
 #define LV_MEMCPY_MEMSET_STD 0
 
@@ -87,8 +100,19 @@
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
 #define LV_TICK_CUSTOM 1
 #if LV_TICK_CUSTOM
-#define LV_TICK_CUSTOM_INCLUDE "Arduino.h"         /*Header for the system time function*/
-#define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())    /*Expression evaluating to current system time in ms*/
+/* === Platform-Aware Tick Configuration === */
+#if defined(SDL_BUILD)
+    /* SDL3 Tick Source (for Linux build) */
+    /* SDL_GetTicks() is in SDL_timer.h, which is included by SDL.h */
+    #define LV_TICK_CUSTOM_INCLUDE <SDL3/SDL.h>
+    #define LV_TICK_CUSTOM_SYS_TIME_EXPR SDL_GetTicks()
+#else
+    /* Arduino/ESP32 Tick Source (default for PlatformIO) */
+    #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"
+    /* You likely have this line too: */
+    #define LV_TICK_CUSTOM_SYS_TIME_EXPR millis()
+#endif
+/* ======================================= */
 #endif   /*LV_TICK_CUSTOM*/
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.

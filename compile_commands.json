@@ -1,0 +1,26 @@
+[
+{
+  "directory": "/home/cindy/code/cpp/temp/src",
+  "command": "/nix/store/dmypp1h4ldn0vfk3fi6yfyf5yxp9yz0k-gcc-wrapper-14.3.0/bin/g++  -I/home/cindy/code/cpp/temp/libdeps/lvgl/src -I/home/cindy/code/cpp/temp/libdeps/TFT_eSPI -I/home/cindy/code/cpp/temp/src/../libdeps/lvgl -I/home/cindy/code/cpp/temp/hal/. -isystem /nix/store/jhn5x6c698ri1lp3n00xgnwvnrvhkpig-sdl2-compat-2.32.56-dev/include/SDL2 -isystem /nix/store/rz12k61wchbslgrqr2pk9xcpxc23czh3-SDL2_image-2.8.8/include/SDL2 -std=gnu++11 -o CMakeFiles/main.dir/main.cpp.o -c /home/cindy/code/cpp/temp/src/main.cpp",
+  "file": "/home/cindy/code/cpp/temp/src/main.cpp",
+  "output": "src/CMakeFiles/main.dir/main.cpp.o"
+},
+{
+  "directory": "/home/cindy/code/cpp/temp/hal",
+  "command": "/nix/store/dmypp1h4ldn0vfk3fi6yfyf5yxp9yz0k-gcc-wrapper-14.3.0/bin/g++  -I/home/cindy/code/cpp/temp/libdeps/lvgl/src -I/home/cindy/code/cpp/temp/libdeps/TFT_eSPI -I/home/cindy/code/cpp/temp/hal/. -isystem /nix/store/jhn5x6c698ri1lp3n00xgnwvnrvhkpig-sdl2-compat-2.32.56-dev/include/SDL2 -isystem /nix/store/rz12k61wchbslgrqr2pk9xcpxc23czh3-SDL2_image-2.8.8/include/SDL2 -std=gnu++11 -o CMakeFiles/hal.dir/LilyGoDisplay.cpp.o -c /home/cindy/code/cpp/temp/hal/LilyGoDisplay.cpp",
+  "file": "/home/cindy/code/cpp/temp/hal/LilyGoDisplay.cpp",
+  "output": "hal/CMakeFiles/hal.dir/LilyGoDisplay.cpp.o"
+},
+{
+  "directory": "/home/cindy/code/cpp/temp/hal",
+  "command": "/nix/store/dmypp1h4ldn0vfk3fi6yfyf5yxp9yz0k-gcc-wrapper-14.3.0/bin/g++  -I/home/cindy/code/cpp/temp/libdeps/lvgl/src -I/home/cindy/code/cpp/temp/libdeps/TFT_eSPI -I/home/cindy/code/cpp/temp/hal/. -isystem /nix/store/jhn5x6c698ri1lp3n00xgnwvnrvhkpig-sdl2-compat-2.32.56-dev/include/SDL2 -isystem /nix/store/rz12k61wchbslgrqr2pk9xcpxc23czh3-SDL2_image-2.8.8/include/SDL2 -std=gnu++11 -o CMakeFiles/hal.dir/LilyGoInput.cpp.o -c /home/cindy/code/cpp/temp/hal/LilyGoInput.cpp",
+  "file": "/home/cindy/code/cpp/temp/hal/LilyGoInput.cpp",
+  "output": "hal/CMakeFiles/hal.dir/LilyGoInput.cpp.o"
+},
+{
+  "directory": "/home/cindy/code/cpp/temp/hal",
+  "command": "/nix/store/dmypp1h4ldn0vfk3fi6yfyf5yxp9yz0k-gcc-wrapper-14.3.0/bin/g++  -I/home/cindy/code/cpp/temp/libdeps/lvgl/src -I/home/cindy/code/cpp/temp/libdeps/TFT_eSPI -I/home/cindy/code/cpp/temp/hal/. -isystem /nix/store/jhn5x6c698ri1lp3n00xgnwvnrvhkpig-sdl2-compat-2.32.56-dev/include/SDL2 -isystem /nix/store/rz12k61wchbslgrqr2pk9xcpxc23czh3-SDL2_image-2.8.8/include/SDL2 -std=gnu++11 -o CMakeFiles/hal.dir/SDLDisplay.cpp.o -c /home/cindy/code/cpp/temp/hal/SDLDisplay.cpp",
+  "file": "/home/cindy/code/cpp/temp/hal/SDLDisplay.cpp",
+  "output": "hal/CMakeFiles/hal.dir/SDLDisplay.cpp.o"
+}
+]

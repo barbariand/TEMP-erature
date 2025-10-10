@@ -1,21 +1,22 @@
-#include "LilyGoDisplay.h"
+#include <Arduino.h>
 
+#include "LilyGo/LV_Helper.h"
+#include "LilyGo/LilyGo_AMOLED.h"
+#include "LilyGoDisplay.h"
+namespace hal {
+using ::beginLvglHelperDMA;
 LilyGoDisplay::LilyGoDisplay() {
   amoled = new LilyGo_AMOLED();
 }
 LilyGoDisplay::~LilyGoDisplay() {
-    delete amoled;
+  delete amoled;
 }
-void LilyGoDisplay::init() {
-  amoled->begin();
-}
-
-void LilyGoDisplay::flush(lv_disp_drv_t* drv, const lv_area_t* area,
-                          lv_color_t* color_p) {
-  uint32_t w = (area->x2 - area->x1 + 1);
-  uint32_t h = (area->y2 - area->y1 + 1);
-  amoled->pushColors(area->x1, area->y1, w, h, (uint16_t*)color_p);
-  lv_disp_flush_ready(drv);
+bool LilyGoDisplay::init() {
+  bool init = amoled->begin();
+  if (init) {
+    beginLvglHelperDMA(*amoled);
+  }
+  return init;
 }
 
 void LilyGoDisplay::setBrightness(uint8_t brightness) {
@@ -29,3 +30,4 @@ void LilyGoDisplay::sleep() {
 void LilyGoDisplay::wakeup() {
   amoled->disp_wakeup();
 }
+}  // namespace hal

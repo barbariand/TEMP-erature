@@ -1,21 +1,28 @@
 #pragma once
-#include "IDisplay.h"
+
+#ifndef ARDUINO
 #include <SDL3/SDL.h>
+#include "IDisplay.h"
 
+namespace hal {
 class SDLDisplay : public IDisplay {
-public:
-    SDLDisplay(int width, int height);
-    ~SDLDisplay();
-    void init() override;
-    void flush(lv_disp_drv_t* drv, const lv_area_t* area, lv_color_t* color_p) override;
+ public:
+  SDLDisplay();
+  ~SDLDisplay();
+  bool init() override;
+  void setBrightness(uint8_t brightness) override;
+  void sleep() override;
+  void wakeup() override;
 
-    // Helper for the main loop
-    SDL_Renderer* getRenderer();
+  // Helper for the main loop
+  SDL_Renderer* getRenderer();
 
-private:
-    int screen_width;
-    int screen_height;
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Texture* texture;
+ private:
+  int screen_width;
+  int screen_height;
+  SDL_Window* window;
+  SDL_Renderer* renderer;
+  SDL_Texture* texture;
 };
+}  // namespace hal
+#endif
