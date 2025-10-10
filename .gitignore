@@ -17,3 +17,6 @@ Butt*
 # nix lang ignores
 .envrc
 .direnv
+
+# macOS
+.DS_Store
