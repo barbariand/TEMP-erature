@@ -17,9 +17,13 @@ LilyGo_Class amoled;
 static lv_obj_t *tileview;
 static lv_obj_t *t1;
 static lv_obj_t *t2;
+static lv_obj_t *t3;
 static lv_obj_t *t1_label;
-static lv_obj_t *t2_label;
+static lv_obj_t *t2_label;  
+static lv_obj_t *img1;
+LV_IMG_DECLARE(rackstar);
 static bool t2_dark = false; // start tile #2 in light mode
+
 
 // Function: Tile #2 Color change
 static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
@@ -50,12 +54,13 @@ static void create_ui() {
   // Add two horizontal tiles
   t1 = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_HOR);
   t2 = lv_tileview_add_tile(tileview, 1, 0, LV_DIR_HOR);
+  t3 = lv_tileview_add_tile(tileview, 2, 0, LV_DIR_HOR);
 
   // Tile #1
   {
     t1_label = lv_label_create(t1);
-    lv_label_set_text(t1_label, "Hello Students");
-    lv_obj_set_style_text_font(t1_label, &lv_font_montserrat_28, 0);
+    lv_label_set_text(t1_label, "Hello penis");
+    lv_obj_set_style_text_font(t1_label, &lv_font_montserrat_48, 0);
     lv_obj_center(t1_label);
     apply_tile_colors(t1, t1_label, /*dark=*/false);
   }
@@ -71,6 +76,14 @@ static void create_ui() {
     lv_obj_add_flag(t2, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(t2, on_tile2_clicked, LV_EVENT_CLICKED, NULL);
   }
+  
+  // Tile #3
+  {
+    img1 = lv_img_create(t3);
+    lv_img_set_src(img1,&rackstar);
+    lv_obj_center(img1);
+  }
+
 }
 
 // Function: Connects to WIFI
