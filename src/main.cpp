@@ -55,7 +55,11 @@ static void create_ui() {
   {
     t1_label = lv_label_create(t1);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     lv_label_set_text(t1_label, "Group 15, ver. 1.0");
+=======
+    lv_label_set_text(t1_label, "I enjoy the weather!");
+>>>>>>> Stashed changes
 =======
     lv_label_set_text(t1_label, "I enjoy the weather!");
 >>>>>>> Stashed changes
