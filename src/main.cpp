@@ -54,7 +54,11 @@ static void create_ui() {
   // Tile #1
   {
     t1_label = lv_label_create(t1);
+<<<<<<< Updated upstream
     lv_label_set_text(t1_label, "Group 15, ver. 1.0");
+=======
+    lv_label_set_text(t1_label, "I enjoy the weather!");
+>>>>>>> Stashed changes
     lv_obj_set_style_text_font(t1_label, &lv_font_montserrat_28, 0);
     lv_obj_center(t1_label);
     apply_tile_colors(t1, t1_label, /*dark=*/false);
