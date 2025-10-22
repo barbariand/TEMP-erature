@@ -14,7 +14,7 @@
       devShells.default = with pkgs;
         mkShell {
           nativeBuildInputs = [libtiff libwebp sdl3 sdl3-image];
-          packages = with pkgs; [cmake platformio arduino-cli arduino-language-server clang-tools];
+          packages = with pkgs; [gdb cmake platformio arduino-cli arduino-language-server clang-tools];
           shellHook = ''
           '';
         };

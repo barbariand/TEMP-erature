@@ -20,6 +20,7 @@ SDLDisplay::~SDLDisplay() {
 }
 
 bool SDLDisplay::init() {
+
   SDL_Init(SDL_INIT_VIDEO);
   window = SDL_CreateWindow("ESP32-T4-S3 simulation", screen_width,
                             screen_height, 0);
@@ -27,6 +28,7 @@ bool SDLDisplay::init() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB565,
                               SDL_TEXTUREACCESS_STREAMING, screen_width,
                               screen_height);
+  lv_init();
   return true;
 }
 

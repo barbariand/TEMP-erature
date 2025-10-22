@@ -6,7 +6,7 @@
 static const char* WIFI_SSID = "SSID";
 static const char* WIFI_PASSWORD = "PWD";
 
-hal::Display amoled;
+hal::Display* amoled;
 
 static lv_obj_t* tileview;
 static lv_obj_t* t1;
@@ -88,7 +88,10 @@ static void connect_wifi() {
 
 // Must have function: Setup is run once on startup
 void setup() {
-  hal::init(&amoled);
+  printf("test");
+amoled = new hal::Display();
+  printf("test1");
+  hal::init(amoled);
 
   create_ui();
   connect_wifi();
@@ -100,6 +103,7 @@ void loop() {
   hal::sleep(sleep_delay);
 }
 int main() {
+  printf("test");
   setup();
   while (true) {
     loop();
