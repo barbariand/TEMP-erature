@@ -1,5 +1,5 @@
 #pragma once
-#include "IDisplay.h"
+#include "IDisplay.hpp"
 namespace hal {
 #include "LilyGo/LilyGo_AMOLED.h"
 class LilyGoDisplay : public IDisplay {

@@ -1,6 +1,6 @@
 #pragma once
-#include "Display.h"
-#include "IDisplay.h"
+#include "Display.hpp"
+#include "IDisplay.hpp"
 #if defined(ARDUINO)
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -9,8 +9,8 @@
 #include <WiFi.h>
 #include <lvgl.h>
 #include "./LilyGo/LilyGo_AMOLED.h"
-#include "EPS32Helper.h"
+#include "EPS32Helper.hpp"
 #include "LilyGo/LV_Helper.h"
 #else
-#include "SDLHelper.h"
+#include "SDLHelper.hpp"
 #endif

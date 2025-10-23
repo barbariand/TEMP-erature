@@ -1,11 +1,11 @@
 #pragma once
 #if defined(ARDUINO)
-#include "LilyGoDisplay.h"
+#include "LilyGoDisplay.hpp"
 namespace hal {
 using Display = LilyGoDisplay;
 }
 #else
-#include "SDLDisplay.h"
+#include "SDLDisplay.hpp"
 namespace hal {
 using Display = SDLDisplay;
 }

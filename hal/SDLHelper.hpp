@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <thread>
-#include "Display.h"
+#include "Display.hpp"
 namespace hal {
 inline void init(Display* amoled) {
 
@@ -17,9 +17,11 @@ inline void init(Display* amoled) {
 inline void sleep(int sleep_delay) {
   std::this_thread::sleep_for(std::chrono::milliseconds(sleep_delay));
 }
-int printf(const char* format, ...) {
-  // The compiler directly forwards the variable arguments to the
-  // standard C library's printf function (from <cstdio>).
-  return ::printf(format, __builtin_va_list());
+inline int printf(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  int result = ::vprintf(format, args);
+  va_end(args);
+  return result;
 }
 }  // namespace hal

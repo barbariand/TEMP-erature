@@ -1,6 +1,6 @@
-#include <HAL.h>
 #include <lvgl.h>
 #include <time.h>
+#include <HAL.hpp>
 #if !defined(ARDUINO)
 #include <csignal>
 #endif

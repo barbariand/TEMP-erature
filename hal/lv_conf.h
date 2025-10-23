@@ -46,12 +46,8 @@
  *=========================*/
 
 #if defined(SDL_BUILD)
-    /* --- Settings for SDL/Linux Build --- */
-    /* 0: use the built-in `lv_mem_alloc()` and `lv_mem_free()`*/
     #define LV_MEM_CUSTOM 0
     #if LV_MEM_CUSTOM == 0
-        /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-        /* Increased to 128KB for desktop, 48KB is small */
         #define LV_MEM_SIZE (128U * 1024U)      /*[bytes]*/
         #define LV_MEM_ADR 0     /*0: unused*/
         #if LV_MEM_ADR == 0

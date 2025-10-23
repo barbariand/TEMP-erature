@@ -2,7 +2,7 @@
 #pragma once
 #include <Arduino.h>
 #include <cstdio>
-#include "Display.h"
+#include "Display.hpp"
 namespace hal {
 inline void init(Display* amoled) {
   Serial.begin(115200);
