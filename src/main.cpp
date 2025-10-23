@@ -1,13 +1,20 @@
 #include <HAL.h>
 #include <lvgl.h>
 #include <time.h>
-
-// Wi-Fi credentials (Delete these before commiting to GitHub)
-static const char* WIFI_SSID = "SSID";
-static const char* WIFI_PASSWORD = "PWD";
+#if !defined(ARDUINO)
+#include <csignal>
+#endif
+#include "wifi.h"
 
 hal::Display* amoled;
-
+#if defined(ARDUINO)
+static bool exit_flag = 0;  // Global flag
+#else
+volatile sig_atomic_t exit_flag = 0;  // Global flag
+void handle_sigterm(int signum) {
+  exit_flag = 1;  // Set the flag to signal exit
+}
+#endif
 static lv_obj_t* tileview;
 static lv_obj_t* t1;
 static lv_obj_t* t2;
@@ -86,26 +93,36 @@ static void connect_wifi() {
   // }
 }
 
-// Must have function: Setup is run once on startup
 void setup() {
-  printf("test");
-amoled = new hal::Display();
-  printf("test1");
+
+#if !defined(ARDUINO)
+  signal(SIGTERM, handle_sigterm);
+  signal(SIGINT, handle_sigterm);
+#endif
+  amoled = new hal::Display();
   hal::init(amoled);
 
   create_ui();
   connect_wifi();
 }
 
-// Must have function: Loop runs continously on device after setup
 void loop() {
-  int sleep_delay = lv_timer_handler();
-  hal::sleep(sleep_delay);
+  if (exit_flag)
+    return;
+
+  if (amoled->handle_events() == 1) {
+    exit_flag = true;
+    return;
+  }
+  int sleep_dur = lv_timer_handler();
+  hal::sleep(sleep_dur);
 }
 int main() {
-  printf("test");
   setup();
-  while (true) {
+
+  while (!exit_flag) {
     loop();
   }
+  hal::printf("\nExiting gracefully...");
+  return 0;
 }

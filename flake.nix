@@ -13,9 +13,10 @@
     in {
       devShells.default = with pkgs;
         mkShell {
-          nativeBuildInputs = [libtiff libwebp sdl3 sdl3-image];
+          nativeBuildInputs = [arduino-core libtiff libwebp sdl3 sdl3-image];
           packages = with pkgs; [gdb cmake platformio arduino-cli arduino-language-server clang-tools];
           shellHook = ''
+            export Arduino_DIR="${arduino-core}"
           '';
         };
     });

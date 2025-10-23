@@ -10,6 +10,7 @@ class LilyGoDisplay : public IDisplay {
   void setBrightness(uint8_t brightness) override;
   void sleep() override;
   void wakeup() override;
+  int handle_events() override;
 
  private:
   LilyGo_AMOLED* amoled;

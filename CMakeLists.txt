@@ -13,7 +13,7 @@ include_directories(libdeps/TFT_eSPI)
 file(GLOB_RECURSE LVGL_SOURCES
     "libdeps/lvgl/src/*.c"
 )
-
+add_custom_target(run COMMAND ${EXECUTABLE_OUTPUT_PATH}/main DEPENDS main)
 # Create a static library target for LVGL from those source files
 add_library(lvgl_lib STATIC ${LVGL_SOURCES})
 
@@ -26,10 +26,9 @@ target_include_directories(lvgl_lib PUBLIC
 
 # Tell LVGL exactly where to find your config file
 target_compile_definitions(lvgl_lib PUBLIC
-    LV_CONF_PATH=lv_conf.h
-    SDL_BUILD  # <-- ADDED: Identify this as the SDL build
+    LV_CONF_PATH="lv_conf.h"
+    SDL_BUILD
 )
-
 
 # --- Your HAL Library ---
 add_library(hal STATIC
@@ -39,8 +38,8 @@ target_include_directories(hal PUBLIC hal hal/LilyGo)
 
 # Tell HAL (which also includes lvgl headers) where to find the config
 target_compile_definitions(hal PUBLIC
-    LV_CONF_PATH=lv_conf.h
-    SDL_BUILD  # <-- ADDED: Identify this as the SDL build
+    LV_CONF_PATH="lv_conf.h"
+    SDL_BUILD
 )
 
 find_package(SDL3 REQUIRED)

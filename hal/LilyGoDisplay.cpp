@@ -30,4 +30,7 @@ void LilyGoDisplay::sleep() {
 void LilyGoDisplay::wakeup() {
   amoled->disp_wakeup();
 }
+int LilyGoDisplay::handle_events() {
+  return 0;
+}
 }  // namespace hal
