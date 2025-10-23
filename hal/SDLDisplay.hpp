@@ -1,5 +1,5 @@
 #ifndef ARDUINO
-#pragma once  // Use include guards
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <lvgl.h>
@@ -18,7 +18,6 @@ class SDLDisplay : public IDisplay {
   void wakeup() override;
   int handle_events() override;
 
-  // Keep getRenderer if needed elsewhere, otherwise maybe remove
   SDL_Renderer* getRenderer();
 
  private:
@@ -30,16 +29,20 @@ class SDLDisplay : public IDisplay {
   void flush_display(lv_display_t* drv, const lv_area_t* area,
                      uint8_t* color_p);
 
+  // Define screen dimensions as constants
+  static constexpr int SCREEN_WIDTH = 800;
+  static constexpr int SCREEN_HEIGHT = 600;
+
   int screen_width;
   int screen_height;
   SDL_Window* window;
   SDL_Renderer* renderer;
   SDL_Texture* texture;
 
-  lv_draw_buf_t disp_buf;
-  static constexpr int BUF_LINES = 600;
-  static lv_color_t buf1[800 * BUF_LINES];
-  static lv_color_t buf2[800 * BUF_LINES];
+  // Static buffers sized with the constants
+  static lv_color_t buf1[SCREEN_WIDTH * SCREEN_HEIGHT];
+  static lv_color_t buf2[SCREEN_WIDTH * SCREEN_HEIGHT];
+
   lv_display_t* disp_drv;
 };
 
