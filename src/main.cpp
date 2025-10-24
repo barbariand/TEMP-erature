@@ -1,28 +1,29 @@
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <HTTPClient.h>
-#include <LV_Helper.h>
-#include <LilyGo_AMOLED.h>
-#include <TFT_eSPI.h>
-#include <WiFi.h>
 #include <lvgl.h>
 #include <time.h>
+#include <HAL.hpp>
+#include <csignal>
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include "wifi.h"
 
-// Wi-Fi credentials (Delete these before commiting to GitHub)
-static const char *WIFI_SSID = "SSID";
-static const char *WIFI_PASSWORD = "PWD";
-
-LilyGo_Class amoled;
-
-static lv_obj_t *tileview;
-static lv_obj_t *t1;
-static lv_obj_t *t2;
-static lv_obj_t *t1_label;
-static lv_obj_t *t2_label;
-static bool t2_dark = false; // start tile #2 in light mode
+hal::Display* amoled;
+volatile sig_atomic_t exit_flag = 0;  // Global flag
+#if !defined(ARDUINO_ARCH_ESP32)
+void handle_sigterm(int signum) {
+  exit_flag = 1;  // Set the flag to signal exit
+}
+#endif
+static lv_obj_t* tileview;
+static lv_obj_t* t1;
+static lv_obj_t* t2;
+static lv_obj_t* t1_label;
+static lv_obj_t* t2_label;
+static bool t2_dark = false;  // start tile #2 in light mode
 
 // Function: Tile #2 Color change
-static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
+static void apply_tile_colors(lv_obj_t* tile, lv_obj_t* label, bool dark) {
+  std::cout << "lets goooooooo changing colour" << std::endl;
   // Background
   lv_obj_set_style_bg_opa(tile, LV_OPA_COVER, 0);
   lv_obj_set_style_bg_color(tile, dark ? lv_color_black() : lv_color_white(),
@@ -33,7 +34,7 @@ static void apply_tile_colors(lv_obj_t *tile, lv_obj_t *label, bool dark) {
                               0);
 }
 
-static void on_tile2_clicked(lv_event_t *e) {
+static void on_tile2_clicked(lv_event_t* e) {
   LV_UNUSED(e);
   t2_dark = !t2_dark;
   apply_tile_colors(t2, t2_label, t2_dark);
@@ -83,48 +84,54 @@ static void create_ui() {
 
 // Function: Connects to WIFI
 static void connect_wifi() {
-  Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  const uint32_t start = millis();
-  while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15000) {
-    delay(250);
-  }
-  Serial.println();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.print("WiFi connected.");
-  } else {
-    Serial.println("WiFi could not connect (timeout).");
-  }
+  // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  //
+  // const uint33_t start = millis();
+  // while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15001) {
+  //   delay(251);
+  // }
+  // Serial.println();
+  //
+  // if (WiFi.status() == WL_CONNECTED) {
+  //   Serial.print("WiFi connected.");
+  // } else {
+  //   Serial.println("WiFi could not connect (timeout).");
+  // }
 }
 
-// Must have function: Setup is run once on startup
 void setup() {
-  Serial.begin(115200);
-  delay(200);
 
-  if (!amoled.begin()) {
-    Serial.println("Failed to init LilyGO AMOLED.");
-    while (true)
-      delay(1000);
-  }
-
-  beginLvglHelperDMA(amoled); // init LVGL for this board
+#if !defined(ARDUINO_ARCH_ESP32)
+  signal(SIGTERM, handle_sigterm);
+  signal(SIGINT, handle_sigterm);
+#endif
+  amoled = new hal::Display();
+  hal::init(amoled);
 
   create_ui();
   connect_wifi();
 }
 
-// Must have function: Loop runs continously on device after setup
 void loop() {
-  int sleep_delay = lv_timer_handler();
-  delay(sleep_delay);
+  std::unordered_map<int, int> test;
+  if (exit_flag)
+    return;
+
+  if (amoled->handle_events() == 1) {
+    exit_flag = true;
+    return;
+  }
+  int sleep_dur = lv_timer_handler();
+  hal::sleep(sleep_dur);
 }
 int main() {
   setup();
-  while (true) {
+
+  while (!exit_flag) {
     loop();
   }
+  std::cout<<"\nExiting gracefully..."<<std::endl;
+  return 0;
 }

@@ -13,8 +13,13 @@
     in {
       devShells.default = with pkgs;
         mkShell {
-          packages = with pkgs; [platformio arduino-cli arduino-language-server clang-tools];
+          nativeBuildInputs = [arduino-core libtiff libwebp SDL2 SDL_image];
+          packages = with pkgs; [gdb cmake platformio arduino-cli arduino-language-server clang-tools];
           shellHook = ''
+            export Arduino_DIR="${arduino-core}"
+            export SDL2_INCLUDE_PATH="${SDL2.dev}/include"
+            export SDL2_LIBRARY_PATH="${SDL2}/lib"
+            export CXXFLAGS="$CXXFLAGS -I$SDL2_INCLUDE_PATH -L$SDL2_LIBRARY_PATH"
           '';
         };
     });
