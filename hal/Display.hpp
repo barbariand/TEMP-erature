@@ -1,5 +1,5 @@
 #pragma once
-#if defined(ARDUINO)
+#if defined(ARDUINO_ARCH_ESP32)
 #include "LilyGoDisplay.hpp"
 namespace hal {
 using Display = LilyGoDisplay;

@@ -1,7 +1,7 @@
 #pragma once
 #include "Display.hpp"
 #include "IDisplay.hpp"
-#if defined(ARDUINO)
+#if defined(ARDUINO_ARCH_ESP32)
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>

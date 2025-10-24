@@ -1,10 +1,9 @@
-#ifndef ARDUINO
+#ifndef ARDUINO_ARCH_ESP32
 #include "SDLDisplay.hpp"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_version.h>
 #include <iostream>
 
-// KORRIGERING: Går tillbaka till fulla buffrar för DIRECT mode
 lv_color_t hal::SDLDisplay::buf1[hal::SDLDisplay::SCREEN_WIDTH *
                                  hal::SDLDisplay::SCREEN_HEIGHT];
 lv_color_t hal::SDLDisplay::buf2[hal::SDLDisplay::SCREEN_WIDTH *
@@ -109,7 +108,6 @@ bool SDLDisplay::init() {
   }
   std::cout << "LVGL Display Driver Created." << std::endl;
 
-  // KORRIGERING 2: Går tillbaka till full buffertstorlek
   uint32_t buf_size_bytes = SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(lv_color_t);
   SDL_Log("Buffer size set to: %u bytes (%d w * %d h * %d bpp)",
           (unsigned int)buf_size_bytes, SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -117,7 +115,6 @@ bool SDLDisplay::init() {
 
   lv_display_set_flush_cb(disp_drv, flush_cb_static);
 
-  // KORRIGERING 3: Går tillbaka till DIRECT-läge
   lv_display_set_buffers(disp_drv, buf1, buf2, buf_size_bytes,
                          LV_DISPLAY_RENDER_MODE_DIRECT);
 
@@ -203,32 +200,21 @@ void SDLDisplay::flush_display(lv_display_t* drv, const lv_area_t* area,
     return;
   }
 
-  // --- START NEW METHOD ---
-
   void* texture_pixels = nullptr;
   int texture_pitch = 0;
-  SDL_Rect r = {x1, y1, w,
-                h};  // The rectangle on the texture we want to write to
-
-  // 1. Lock only the part of the texture we need to update
+  SDL_Rect r = {x1, y1, w, h};
   if (SDL_LockTexture(texture, &r, &texture_pixels, &texture_pitch) != 0) {
     SDL_Log("SDL_LockTexture failed: %s", SDL_GetError());
     lv_display_flush_ready(drv);
     return;
   }
 
-  // 2. Define our Source (LVGL buffer)
-  // In DIRECT mode, color_p is the start of the *entire* screen buffer
   uint8_t* source_buffer = color_p;
-  int source_pitch =
-      screen_width * sizeof(lv_color_t);  // This is 800 * 3 = 2400
+  int source_pitch = screen_width * sizeof(lv_color_t);
 
-  // 3. Find the starting pixel in the *source* buffer
-  // This is the fix for Bug 1
   uint8_t* source_start =
       source_buffer + (y1 * source_pitch) + (x1 * sizeof(lv_color_t));
 
-  // 4. Define our Destination (SDL texture)
   uint8_t* dest_pixels = static_cast<uint8_t*>(texture_pixels);
 
   SDL_Log("Texture locked: dest_ptr=%p, texture_pitch=%d", (void*)dest_pixels,
@@ -236,34 +222,21 @@ void SDLDisplay::flush_display(lv_display_t* drv, const lv_area_t* area,
   SDL_Log("Source locked:  source_start=%p, source_pitch=%d",
           (void*)source_start, source_pitch);
 
-  // 5. Copy the data, row by row
-  // This is the fix for Bug 2 (the pitch mismatch)
   int bytes_per_row_to_copy = w * sizeof(lv_color_t);
 
   if (texture_pitch == source_pitch) {
-    // If pitches match, we can do one big copy (for the locked area)
     SDL_Log("Pitches match! Doing single memcpy.");
     int total_bytes = bytes_per_row_to_copy * h;
     memcpy(dest_pixels, source_start, total_bytes);
   } else {
-    // Pitches do NOT match. Must copy row by row.
     SDL_Log("Pitch mismatch! Copying row-by-row.");
     for (int y = 0; y < h; ++y) {
-      memcpy(
-          dest_pixels + (y * texture_pitch),  // Destination: row 'y' in texture
-          source_start +
-              (y * source_pitch),  // Source:      row 'y' in LVGL buffer
-          bytes_per_row_to_copy    // Amount to copy
-      );
+      memcpy(dest_pixels + (y * texture_pitch),
+             source_start + (y * source_pitch), bytes_per_row_to_copy);
     }
   }
 
-  // 6. Unlock the texture
   SDL_UnlockTexture(texture);
-
-  // --- END NEW METHOD ---
-
-  // 7. Render the *entire* texture to the screen
   if (SDL_RenderCopy(renderer, texture, NULL, NULL) != 0) {
     SDL_Log("SDL_RenderCopy failed: %s", SDL_GetError());
     lv_display_flush_ready(drv);

@@ -58,18 +58,9 @@
  * - LV_STDLIB_CUSTOM:      Implement the functions externally
  */
 
-/* --- BEGIN CUSTOM MEMORY/STDLIB CONFIG (from v8) --- */
-#if defined(SDL_BUILD)
-    /* Settings for SDL Build */
-    #define LV_USE_STDLIB_MALLOC    LV_STDLIB_BUILTIN
-    #define LV_USE_STDLIB_STRING    LV_STDLIB_BUILTIN
-    #define LV_USE_STDLIB_SPRINTF   LV_STDLIB_BUILTIN
-#else
-    /* Settings for non-SDL (presumed ESP32) Build */
-    #define LV_USE_STDLIB_MALLOC    LV_STDLIB_CUSTOM
-    #define LV_USE_STDLIB_STRING    LV_STDLIB_BUILTIN /* Use LVGL's builtin as v8 did */
-    #define LV_USE_STDLIB_SPRINTF   LV_STDLIB_BUILTIN /* Use LVGL's builtin as v8 did */
-#endif
+#define LV_USE_STDLIB_MALLOC    LV_STDLIB_BUILTIN
+#define LV_USE_STDLIB_STRING    LV_STDLIB_BUILTIN
+#define LV_USE_STDLIB_SPRINTF   LV_STDLIB_BUILTIN
 /* --- END CUSTOM MEMORY/STDLIB CONFIG --- */
 
 
@@ -85,7 +76,7 @@
     #if defined(SDL_BUILD)
         #define LV_MEM_SIZE (2048* 1024U)   /* [bytes] For SDL (from v8 config) */
     #else
-        #define LV_MEM_SIZE (2048 * 1024U)    /* [bytes] Default */
+        #define LV_MEM_SIZE (64 * 1024U)    /* [bytes] Default */
     #endif
 
     /*Size of the memory expand for `lv_malloc()` in bytes*/
@@ -196,8 +187,8 @@
      */
 
     #define LV_DRAW_SW_SUPPORT_RGB565       1 /* Enabled for 16-bit color */
-    #define LV_DRAW_SW_SUPPORT_RGB565A8     0
     #define LV_DRAW_SW_SUPPORT_RGB888       1
+    #define LV_DRAW_SW_SUPPORT_RGB565A8     0
     #define LV_DRAW_SW_SUPPORT_XRGB8888     0
     #define LV_DRAW_SW_SUPPORT_ARGB8888     0
     #define LV_DRAW_SW_SUPPORT_L8           0

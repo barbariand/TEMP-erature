@@ -1,7 +1,7 @@
 #pragma once
 #include "IDisplay.hpp"
-namespace hal {
 #include "LilyGo/LilyGo_AMOLED.h"
+namespace hal {
 class LilyGoDisplay : public IDisplay {
  public:
   LilyGoDisplay();

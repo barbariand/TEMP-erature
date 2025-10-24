@@ -1,4 +1,4 @@
-#ifndef ARDUINO
+#ifndef ARDUINO_ARCH_ESP32
 #pragma once
 
 #include <SDL2/SDL.h>

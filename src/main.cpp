@@ -1,16 +1,15 @@
 #include <lvgl.h>
 #include <time.h>
 #include <HAL.hpp>
-#if !defined(ARDUINO)
 #include <csignal>
-#endif
+#include <iostream>
+#include <unordered_map>
+#include <vector>
 #include "wifi.h"
 
 hal::Display* amoled;
-#if defined(ARDUINO)
-static bool exit_flag = 0;  // Global flag
-#else
 volatile sig_atomic_t exit_flag = 0;  // Global flag
+#if !defined(ARDUINO_ARCH_ESP32)
 void handle_sigterm(int signum) {
   exit_flag = 1;  // Set the flag to signal exit
 }
@@ -24,6 +23,7 @@ static bool t2_dark = false;  // start tile #2 in light mode
 
 // Function: Tile #2 Color change
 static void apply_tile_colors(lv_obj_t* tile, lv_obj_t* label, bool dark) {
+  std::cout << "lets goooooooo changing colour" << std::endl;
   // Background
   lv_obj_set_style_bg_opa(tile, LV_OPA_COVER, 0);
   lv_obj_set_style_bg_color(tile, dark ? lv_color_black() : lv_color_white(),
@@ -95,7 +95,7 @@ static void connect_wifi() {
 
 void setup() {
 
-#if !defined(ARDUINO)
+#if !defined(ARDUINO_ARCH_ESP32)
   signal(SIGTERM, handle_sigterm);
   signal(SIGINT, handle_sigterm);
 #endif
@@ -107,6 +107,7 @@ void setup() {
 }
 
 void loop() {
+  std::unordered_map<int, int> test;
   if (exit_flag)
     return;
 
@@ -123,6 +124,6 @@ int main() {
   while (!exit_flag) {
     loop();
   }
-  hal::printf("\nExiting gracefully...");
+  std::cout<<"\nExiting gracefully..."<<std::endl;
   return 0;
 }

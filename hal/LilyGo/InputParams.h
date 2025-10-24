@@ -9,7 +9,7 @@
 
 
 #pragma once
-
+#include <Arduino.h>
 #include <freertos/queue.h>
 
 struct InputData {

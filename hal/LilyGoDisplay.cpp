@@ -1,10 +1,11 @@
+#if defined(ARDUINO_ARCH_ESP32)
 #include <Arduino.h>
 
 #include "LilyGo/LV_Helper.h"
 #include "LilyGo/LilyGo_AMOLED.h"
-#include "LilyGoDisplay.h"
+#include "LilyGoDisplay.hpp"
 namespace hal {
-using ::beginLvglHelperDMA;
+using ::beginLvglHelper;
 LilyGoDisplay::LilyGoDisplay() {
   amoled = new LilyGo_AMOLED();
 }
@@ -14,7 +15,7 @@ LilyGoDisplay::~LilyGoDisplay() {
 bool LilyGoDisplay::init() {
   bool init = amoled->begin();
   if (init) {
-    beginLvglHelperDMA(*amoled);
+    beginLvglHelper(*amoled);
   }
   return init;
 }
@@ -34,3 +35,4 @@ int LilyGoDisplay::handle_events() {
   return 0;
 }
 }  // namespace hal
+#endif

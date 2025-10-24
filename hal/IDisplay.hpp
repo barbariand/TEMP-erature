@@ -1,6 +1,5 @@
 #pragma once
 #include <lvgl.h>
-#include <cstdint>
 
 // Interface for any display hardware
 
