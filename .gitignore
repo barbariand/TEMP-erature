@@ -6,7 +6,7 @@ build
 # Files relevant to CMAKE for local version
 .cache
 libdeps/*
-
+compile_commands.json
 # nix lang ignores
 .envrc
 .direnv
