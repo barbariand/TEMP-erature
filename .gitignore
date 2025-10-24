@@ -6,7 +6,7 @@ build
 # Files relevant to CMAKE for local version
 CMakeFiles/*
 .cache
-
+libdeps
 
 # nix lang ignores
 .envrc
