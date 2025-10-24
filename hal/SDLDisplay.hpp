@@ -32,7 +32,7 @@ class SDLDisplay : public IDisplay {
   // Define screen dimensions as constants
   static constexpr int SCREEN_WIDTH = 800;
   static constexpr int SCREEN_HEIGHT = 600;
-
+  static constexpr int PARTIAL_BUF_HEIGHT = 100;
   int screen_width;
   int screen_height;
   SDL_Window* window;

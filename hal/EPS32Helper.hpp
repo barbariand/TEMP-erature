@@ -1,7 +1,6 @@
 
 #pragma once
 #include <Arduino.h>
-#include <cstdio>
 #include "Display.hpp"
 namespace hal {
 inline void init(Display* amoled) {
@@ -19,6 +18,10 @@ inline void sleep(int sleep_delay) {
 }
 
 int printf(const char* format, ...) {
-  return Serial.printf(format, __builtin_va_list());
+  va_list args;
+  va_start(args, format);
+  int result = Serial.vprintf(format, args);
+  va_end(args);
+  return result;
 }
 }  // namespace hal

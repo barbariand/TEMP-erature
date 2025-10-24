@@ -4,6 +4,7 @@
 #include <SDL2/SDL_version.h>
 #include <iostream>
 
+// KORRIGERING: Går tillbaka till fulla buffrar för DIRECT mode
 lv_color_t hal::SDLDisplay::buf1[hal::SDLDisplay::SCREEN_WIDTH *
                                  hal::SDLDisplay::SCREEN_HEIGHT];
 lv_color_t hal::SDLDisplay::buf2[hal::SDLDisplay::SCREEN_WIDTH *
@@ -33,6 +34,14 @@ SDLDisplay::~SDLDisplay() {
 
 bool SDLDisplay::init() {
   std::cout << "Initializing SDLDisplay..." << std::endl;
+  SDL_Log("--- SANITY CHECK ---");
+  SDL_Log("sizeof(lv_color_t) = %d bytes", (int)sizeof(lv_color_t));
+  if (sizeof(lv_color_t) != 3) {
+    SDL_Log(
+        "CRITICAL: sizeof(lv_color_t) is NOT 3! Check LV_COLOR_DEPTH in "
+        "lv_conf.h!");
+  }
+  SDL_Log("--------------------");
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     SDL_Log("SDL could not initialize! SDL_Error: %s", SDL_GetError());
@@ -65,10 +74,12 @@ bool SDLDisplay::init() {
       SDL_Log("--- Using Renderer: %s ---", info.name ? info.name : "Unknown");
     }
   }
-
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB565,
-                              SDL_TEXTUREACCESS_STREAMING, screen_width,
-                              screen_height);
+  const Uint32 sdl_pixel_format = SDL_PIXELFORMAT_BGR24;
+  texture =
+      SDL_CreateTexture(renderer, sdl_pixel_format, SDL_TEXTUREACCESS_STREAMING,
+                        screen_width, screen_height);
+  SDL_Log("Attempting to create texture with format: BGR24 (%s)",
+          SDL_GetPixelFormatName(sdl_pixel_format));
 
   SDL_Log("SDL_CreateTexture result: %p", (void*)texture);
   if (!texture) {
@@ -98,12 +109,20 @@ bool SDLDisplay::init() {
   }
   std::cout << "LVGL Display Driver Created." << std::endl;
 
+  // KORRIGERING 2: Går tillbaka till full buffertstorlek
   uint32_t buf_size_bytes = SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(lv_color_t);
+  SDL_Log("Buffer size set to: %u bytes (%d w * %d h * %d bpp)",
+          (unsigned int)buf_size_bytes, SCREEN_WIDTH, SCREEN_HEIGHT,
+          (int)sizeof(lv_color_t));
 
   lv_display_set_flush_cb(disp_drv, flush_cb_static);
 
+  // KORRIGERING 3: Går tillbaka till DIRECT-läge
   lv_display_set_buffers(disp_drv, buf1, buf2, buf_size_bytes,
-                         LV_DISPLAY_RENDER_MODE_FULL);
+                         LV_DISPLAY_RENDER_MODE_DIRECT);
+
+  lv_display_set_color_format(disp_drv, LV_COLOR_FORMAT_RGB888);
+  SDL_Log("Setting render mode to: LV_DISPLAY_RENDER_MODE_DIRECT");
 
   lv_display_set_user_data(disp_drv, this);
   SDL_Log("Setting user_data in driver to: %p", (void*)this);
@@ -160,25 +179,12 @@ void SDLDisplay::flush_cb_static(lv_display_t* drv, const lv_area_t* area,
 void SDLDisplay::flush_display(lv_display_t* drv, const lv_area_t* area,
                                uint8_t* color_p) {
 
+  SDL_Log("--- FLUSH (DIRECT MODE - LOCKTEXTURE) ---");
+
   if (!renderer || !texture || !drv || !area || !color_p) {
-    SDL_Log(
-        "Error: NULL pointer passed to flush_display (renderer=%p, "
-        "texture=%p)!",
-        (void*)renderer, (void*)texture);
+    SDL_Log("Error: NULL pointer passed to flush_display!");
     if (drv)
       lv_display_flush_ready(drv);
-    return;
-  }
-
-  SDL_ClearError();
-
-  int tex_w, tex_h;
-  int query_result = SDL_QueryTexture(texture, NULL, NULL, &tex_w, &tex_h);
-  if (query_result != 0) {
-    const char* sdl_error = SDL_GetError();
-    SDL_Log("SDL_QueryTexture failed! Error: %s",
-            sdl_error ? sdl_error : "None");
-    lv_display_flush_ready(drv);
     return;
   }
 
@@ -186,53 +192,92 @@ void SDLDisplay::flush_display(lv_display_t* drv, const lv_area_t* area,
   int y1 = (int)area->y1;
   int x2 = (int)area->x2;
   int y2 = (int)area->y2;
+  int w = lv_area_get_width(area);
+  int h = lv_area_get_height(area);
 
-  if (x1 >= tex_w || y1 >= tex_h || x2 < 0 || y2 < 0) {
-    lv_display_flush_ready(drv);
-    return;
-  }
-
-  x1 = (x1 < 0) ? 0 : x1;
-  y1 = (y1 < 0) ? 0 : y1;
-  x2 = (x2 >= tex_w) ? tex_w - 1 : x2;
-  y2 = (y2 >= tex_h) ? tex_h - 1 : y2;
-
-  int w = x2 - x1 + 1;
-  int h = y2 - y1 + 1;
+  SDL_Log("Area to flush: x1=%d, y1=%d, w=%d, h=%d", x1, y1, w, h);
 
   if (w <= 0 || h <= 0) {
+    SDL_Log("Skipping flush: w or h is <= 0.");
     lv_display_flush_ready(drv);
     return;
   }
 
-  SDL_Rect r = {x1, y1, w, h};
+  // --- START NEW METHOD ---
 
-  int source_pitch = screen_width * sizeof(lv_color_t);
+  void* texture_pixels = nullptr;
+  int texture_pitch = 0;
+  SDL_Rect r = {x1, y1, w,
+                h};  // The rectangle on the texture we want to write to
 
-  uint8_t* source_pixels =
-      color_p + (y1 * source_pitch) + (x1 * sizeof(lv_color_t));
-  SDL_Log("--- FLUSH ---");
-  SDL_Log("Area to flush: x1=%d, y1=%d (w=%d, h=%d)", x1, y1, w, h);
-  SDL_Log("Member screen_width: %d", screen_width);
-  SDL_Log("Calculated source_pitch: %d bytes (should be 800 * 2 = 1600)",
-          source_pitch);
-  SDL_Log("Pointers: base=%p, offset_start=%p", (void*)color_p,
-          (void*)source_pixels);
-  SDL_Log("-------------");
-  if (SDL_UpdateTexture(texture, &r, (const void*)source_pixels,
-                        source_pitch) != 0) {
-    SDL_Log("SDL_UpdateTexture failed: %s", SDL_GetError());
+  // 1. Lock only the part of the texture we need to update
+  if (SDL_LockTexture(texture, &r, &texture_pixels, &texture_pitch) != 0) {
+    SDL_Log("SDL_LockTexture failed: %s", SDL_GetError());
     lv_display_flush_ready(drv);
     return;
   }
 
+  // 2. Define our Source (LVGL buffer)
+  // In DIRECT mode, color_p is the start of the *entire* screen buffer
+  uint8_t* source_buffer = color_p;
+  int source_pitch =
+      screen_width * sizeof(lv_color_t);  // This is 800 * 3 = 2400
+
+  // 3. Find the starting pixel in the *source* buffer
+  // This is the fix for Bug 1
+  uint8_t* source_start =
+      source_buffer + (y1 * source_pitch) + (x1 * sizeof(lv_color_t));
+
+  // 4. Define our Destination (SDL texture)
+  uint8_t* dest_pixels = static_cast<uint8_t*>(texture_pixels);
+
+  SDL_Log("Texture locked: dest_ptr=%p, texture_pitch=%d", (void*)dest_pixels,
+          texture_pitch);
+  SDL_Log("Source locked:  source_start=%p, source_pitch=%d",
+          (void*)source_start, source_pitch);
+
+  // 5. Copy the data, row by row
+  // This is the fix for Bug 2 (the pitch mismatch)
+  int bytes_per_row_to_copy = w * sizeof(lv_color_t);
+
+  if (texture_pitch == source_pitch) {
+    // If pitches match, we can do one big copy (for the locked area)
+    SDL_Log("Pitches match! Doing single memcpy.");
+    int total_bytes = bytes_per_row_to_copy * h;
+    memcpy(dest_pixels, source_start, total_bytes);
+  } else {
+    // Pitches do NOT match. Must copy row by row.
+    SDL_Log("Pitch mismatch! Copying row-by-row.");
+    for (int y = 0; y < h; ++y) {
+      memcpy(
+          dest_pixels + (y * texture_pitch),  // Destination: row 'y' in texture
+          source_start +
+              (y * source_pitch),  // Source:      row 'y' in LVGL buffer
+          bytes_per_row_to_copy    // Amount to copy
+      );
+    }
+  }
+
+  // 6. Unlock the texture
+  SDL_UnlockTexture(texture);
+
+  // --- END NEW METHOD ---
+
+  // 7. Render the *entire* texture to the screen
   if (SDL_RenderCopy(renderer, texture, NULL, NULL) != 0) {
     SDL_Log("SDL_RenderCopy failed: %s", SDL_GetError());
     lv_display_flush_ready(drv);
     return;
   }
 
-  SDL_RenderPresent(renderer);
+  bool is_last = lv_display_flush_is_last(drv);
+  SDL_Log("Is last flush? %s", is_last ? "YES" : "NO");
+
+  if (is_last) {
+    SDL_Log(">>> Presenting to screen <<<");
+    SDL_RenderPresent(renderer);
+  }
+  SDL_Log("--- FLUSH END ---");
 
   lv_display_flush_ready(drv);
 }
@@ -250,10 +295,10 @@ int SDLDisplay::handle_events() {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     if (event.type == SDL_QUIT) {
-      return 1;
+      return 1;  // Signal to exit
     }
   }
-  return 0;
+  return 0;  // Continue running
 }
 
 }  // namespace hal
