@@ -23,6 +23,8 @@ class BaseWidget {
 class Widget : public BaseWidget {
  protected:
   Widget(lv_obj_t* m_obj);
+public:
+
 };
 
 }  // namespace LVGL_Wrapper
