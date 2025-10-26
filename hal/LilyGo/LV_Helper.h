@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#if defined(LILYGO_BUILD)
 #include <lvgl.h>
 #include "LilyGo_Display.h"
 #include "InputParams.h"
@@ -16,4 +17,4 @@
 void beginLvglHelper(LilyGo_Display &board, bool debug = false);
 void beginLvglInputDevice(struct InputParams prams);
 
-
+#endif

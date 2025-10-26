@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#if defined(LILYGO_BUILD)
 #include <stdint.h>
 
 // enum DispRotation {
@@ -39,3 +40,4 @@ class LilyGo_Display {
   uint16_t _offset_y = 0;
   uint8_t _rotation;
 };
+#endif

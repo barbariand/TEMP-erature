@@ -1,4 +1,5 @@
 #pragma once
+#if defined(LILYGO_BUILD)
 #include "IDisplay.hpp"
 #include "LilyGo/LilyGo_AMOLED.h"
 namespace hal {
@@ -16,3 +17,4 @@ class LilyGoDisplay : public IDisplay {
   LilyGo_AMOLED* amoled;
 };
 }  // namespace hal
+#endif

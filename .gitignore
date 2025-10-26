@@ -12,4 +12,6 @@ compile_commands.json
 .direnv
 
 # macOS
+wasm_build/pkg
 .DS_Store
+*/target/

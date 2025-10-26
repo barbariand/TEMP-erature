@@ -1,5 +1,6 @@
-#ifndef ARDUINO_ARCH_ESP32
+
 #pragma once
+#ifdef SDL_BUILD
 
 #include <SDL2/SDL.h>
 #include <lvgl.h>

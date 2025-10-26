@@ -1,8 +1,9 @@
-#ifndef ARDUINO_ARCH_ESP32
-#include "SDLDisplay.hpp"
+#include "drivers/sdl/lv_sdl_private.h"
+#ifdef SDL_BUILD
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_version.h>
 #include <iostream>
+#include "SDLDisplay.hpp"
 
 lv_color_t hal::SDLDisplay::buf1[hal::SDLDisplay::SCREEN_WIDTH *
                                  hal::SDLDisplay::SCREEN_HEIGHT];
@@ -267,6 +268,11 @@ int SDLDisplay::handle_events() {
 
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
+
+    lv_sdl_mouse_handler(&event);
+    lv_sdl_mousewheel_handler(&event);
+    lv_sdl_keyboard_handler(&event);
+
     if (event.type == SDL_QUIT) {
       return 1;  // Signal to exit
     }

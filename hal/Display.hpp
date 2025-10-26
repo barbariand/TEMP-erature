@@ -1,12 +1,17 @@
 #pragma once
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(LILYGO_BUILD)
 #include "LilyGoDisplay.hpp"
 namespace hal {
 using Display = LilyGoDisplay;
 }
-#else
+#elif defined(SDL_BUILD)
 #include "SDLDisplay.hpp"
 namespace hal {
 using Display = SDLDisplay;
+}
+#elif defined(WASM_BUILD)
+#include "WASMDisplay.hpp"
+namespace hal {
+using Display = WASMDisplay;
 }
 #endif

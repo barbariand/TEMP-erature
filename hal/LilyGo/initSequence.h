@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#if defined(LILYGO_BUILD)
 #include <stdint.h>
 
 typedef struct {
@@ -64,4 +65,4 @@ extern const lcd_cmd_t rm67162_spi_cmd[RM67162_INIT_SPI_SEQUENCE_LENGTH];
 
 
 
-
+#endif

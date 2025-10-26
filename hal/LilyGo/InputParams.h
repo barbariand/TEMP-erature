@@ -9,6 +9,7 @@
 
 
 #pragma once
+#if defined(LILYGO_BUILD)
 #include <Arduino.h>
 #include <freertos/queue.h>
 
@@ -25,4 +26,4 @@ struct InputParams {
     QueueHandle_t queue;
     const void *icon;
 };
-
+#endif

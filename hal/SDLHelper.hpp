@@ -1,6 +1,6 @@
 
 #pragma once
-#if !defined(ARDUINO_ARCH_ESP32)
+#ifdef SDL_BUILD
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>

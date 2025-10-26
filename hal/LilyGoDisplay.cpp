@@ -1,4 +1,4 @@
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(LILYGO_BUILD)
 #include <Arduino.h>
 
 #include "LilyGo/LV_Helper.h"

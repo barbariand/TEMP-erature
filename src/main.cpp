@@ -3,8 +3,6 @@
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
-#include <unordered_map>
-#include <vector>
 #include "wifi.h"
 
 hal::Display* amoled;
@@ -107,16 +105,13 @@ void setup() {
 }
 
 void loop() {
-  std::unordered_map<int, int> test;
-  if (exit_flag)
-    return;
+  int sleep_dur = lv_timer_handler();
+  hal::sleep(sleep_dur);
 
   if (amoled->handle_events() == 1) {
     exit_flag = true;
     return;
   }
-  int sleep_dur = lv_timer_handler();
-  hal::sleep(sleep_dur);
 }
 int main() {
   setup();
@@ -127,3 +122,14 @@ int main() {
   std::cout << "\nExiting gracefully..." << std::endl;
   return 0;
 }
+#if defined(WASM_BUILD)
+extern "C" {
+void app_setup() {
+  setup();
+}
+
+void app_loop() {
+  loop();
+}
+}
+#endif  // WASM_BUILD

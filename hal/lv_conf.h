@@ -73,7 +73,7 @@
 
 #if LV_USE_STDLIB_MALLOC == LV_STDLIB_BUILTIN
     /*Size of the memory available for `lv_malloc()` in bytes (>= 2kB)*/
-    #if defined(SDL_BUILD)
+    #if defined(SDL_BUILD)|| defined(WASM_BUILD)
         #define LV_MEM_SIZE (2048* 1024U)   /* [bytes] For SDL (from v8 config) */
     #else
         #define LV_MEM_SIZE (64 * 1024U)    /* [bytes] Default */

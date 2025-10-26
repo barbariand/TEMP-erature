@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#if defined(LILYGO_BUILD)
 #include <Arduino.h>
 
 #if ESP_ARDUINO_VERSION < ESP_ARDUINO_VERSION_VAL(2,0,5)
@@ -446,4 +447,4 @@ private:
 #ifndef LilyGo_Class
 #define LilyGo_Class LilyGo_AMOLED
 #endif
-
+#endif
