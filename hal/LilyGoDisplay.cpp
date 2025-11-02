@@ -1,5 +1,6 @@
 #if defined(LILYGO_BUILD)
 #include <Arduino.h>
+#include <iostream>
 
 #include "LilyGo/LV_Helper.h"
 #include "LilyGo/LilyGo_AMOLED.h"
@@ -13,6 +14,7 @@ LilyGoDisplay::~LilyGoDisplay() {
   delete amoled;
 }
 bool LilyGoDisplay::init() {
+  std::cout << "LilyGo init";
   bool init = amoled->begin();
   if (init) {
     beginLvglHelper(*amoled);

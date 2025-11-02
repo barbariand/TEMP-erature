@@ -1,17 +1,19 @@
 #pragma once
 
-#ifdef WASM_BUILD // Guard for WASM-only compilation
+#ifdef WASM_BUILD
 
 #include "hal/IDisplay.hpp"
 #include "lvgl.h"
 extern "C" {
+
 void wasm_bridge_init();
 
 void wasm_bridge_flush(lv_display_t* disp, const lv_area_t* area,
-                         uint8_t* color_p);
-void wasm_bridge_read(lv_indev_t* indev, lv_indev_data_t* data);
-}
+                       uint8_t* color_p);
 
+void wasm_bridge_get_input_data(uint32_t* out_state, int32_t* out_x,
+                                int32_t* out_y);
+}
 
 namespace hal {
 
@@ -39,4 +41,4 @@ class WASMDisplay : public IDisplay {
 
 }  // namespace hal
 
-#endif // WASM_BUILD
+#endif

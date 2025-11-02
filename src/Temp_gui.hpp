@@ -1,13 +1,13 @@
 #pragma once
 #include <GUI.hpp>
 
-class MyApplication {
+class TempGUI {
  public:
-  MyApplication() = default; // All members are default-constructed
-  ~MyApplication() = default;
+  TempGUI() = default;  // All members are default-constructed
+  ~TempGUI() = default;
 
-  MyApplication(const MyApplication&) = delete;
-  MyApplication& operator=(const MyApplication&) = delete;
+  TempGUI(const TempGUI&) = delete;
+  TempGUI& operator=(const TempGUI&) = delete;
 
   /**
    * @brief Call this *after* lv_init() to build the UI.
@@ -15,7 +15,8 @@ class MyApplication {
   void create_ui();
 
  private:
-  void apply_tile_colors(LVGL_Wrapper::Widget& tile, LVGL_Wrapper::Widget& label, bool dark);
+  void apply_tile_colors(LVGL_Wrapper::Widget& tile,
+                         LVGL_Wrapper::Widget& label, bool dark);
   static void on_tile2_clicked_static(lv_event_t* e);
   void on_tile2_clicked_member();
 

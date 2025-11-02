@@ -4,39 +4,141 @@ extern "C" {
 #include "lvgl.h"
 }
 
+#include <functional>
+#include <map>
+#include <memory>
+#include <vector>
+
 namespace LVGL_Wrapper {
 
+/**
+ * @brief Base class for all LVGL C++ wrappers.
+ *
+ * Manages the C++ object lifetime, C++ child object ownership,
+ * and the C-to-C++ event callback bridge.
+ */
 class BaseWidget {
  protected:
   lv_obj_t* m_obj;
+  std::vector<std::unique_ptr<BaseWidget>> m_children;
+  std::map<lv_event_code_t, std::function<void(lv_event_t*)>> m_callbacks;
 
-  /**
-   * @brief Default constructor. Initializes as a null object.
-   */
-  BaseWidget() : m_obj(nullptr) {}
+  static void universal_event_handler(lv_event_t* e) {
+    BaseWidget* widget = static_cast<BaseWidget*>(lv_event_get_user_data(e));
+    if (!widget)
+      return;
 
-  /**
-   * @brief Protected constructor to wrap an existing object.
-   */
-  explicit BaseWidget(lv_obj_t* obj) : m_obj(obj) {
-    wrap(obj);  // Use wrap to set user data
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_DELETE) {
+      widget->m_obj = nullptr;
+      return;
+    }
+
+    auto it = widget->m_callbacks.find(code);
+    if (it != widget->m_callbacks.end()) {
+      it->second(e);
+    }
   }
 
   /**
-   * @brief Common wrapping logic, usable by create() or sub-classes.
-   */
+     * @brief Default constructor. Initializes as a null object.
+     */
+  BaseWidget() : m_obj(nullptr) {}
+
+  /**
+     * @brief Protected constructor to wrap an existing object.
+     * Used by Screen singleton.
+     */
+  explicit BaseWidget(lv_obj_t* obj) : m_obj(obj) {
+    // Note: We call wrap() from the derived class (e.g., Screen::getInstance)
+    // because the vtable might not be ready here.
+    // For Screen, wrap() is called in getInstance().
+  }
+
+  /**
+     * @brief Common wrapping logic.
+     * Sets user data to point to this C++ instance and
+     * hooks the internal delete handler.
+     */
   void wrap(lv_obj_t* obj) {
     m_obj = obj;
     if (m_obj) {
-      // Set user data to point to this C++ instance
       lv_obj_set_user_data(m_obj, this);
+      lv_obj_add_event_cb(m_obj, universal_event_handler, LV_EVENT_DELETE,
+                          nullptr);
     }
   }
 
  public:
-  virtual ~BaseWidget() {}
+  /**
+     * @brief Virtual destructor.
+     *
+     * If the C++ wrapper is destroyed (e.g., goes out of scope)
+     * and the LVGL object still exists (m_obj != nullptr),
+     * we delete the LVGL object. This will trigger a cascade
+     * of LV_EVENT_DELETE events for all children, which
+     * our universal_event_handler will catch, nulling out
+     * the m_obj pointers in the child C++ wrappers.
+     */
+  virtual ~BaseWidget() {
+    m_children.clear();
 
+    if (m_obj) {
+      if (m_obj != lv_scr_act()) {
+        lv_obj_del(m_obj);
+      }
+      m_obj = nullptr;
+    }
+  }
+
+  // Delete copy/move to prevent slicing and ownership issues
+  BaseWidget(const BaseWidget&) = delete;
+  BaseWidget& operator=(const BaseWidget&) = delete;
+
+  /**
+     * @brief Gets the raw lv_obj_t pointer.
+     */
   lv_obj_t* raw() const { return m_obj; }
+
+  /**
+     * @brief Creates, adds, and stores a new C++ child widget.
+     *
+     * This is the new primary way to create widgets.
+     *
+     * @tparam T The C++ Wrapper type (e.g., Label, Button)
+     * @return A reference to the newly created child widget for chaining.
+     * @example
+     * screen.add_child<Label>()
+     * .set_text("Hello")
+     * .align(LV_ALIGN_CENTER, 0, 0);
+     */
+  template <typename T>
+  T& add_child() {
+    auto child_ptr = std::make_unique<T>();
+
+    child_ptr->create(*this);
+
+    T& child_ref = *child_ptr;
+    m_children.push_back(std::move(child_ptr));
+    return child_ref;
+  }
+
+  /**
+     * @brief Gets the C++ wrapper from a raw lv_obj_t*.
+     */
+  static BaseWidget* get_wrapper(lv_obj_t* obj) {
+    if (!obj)
+      return nullptr;
+    return static_cast<BaseWidget*>(lv_obj_get_user_data(obj));
+  }
+
+  /**
+     * @brief Gets the C++ wrapper and dynamic_casts it to type T.
+     */
+  template <typename T>
+  static T* get_wrapper_as(lv_obj_t* obj) {
+    return dynamic_cast<T*>(get_wrapper(obj));
+  }
 };
 
 class Widget : public BaseWidget {
@@ -267,8 +369,6 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  // --- Layout (Flex & Grid) ---
-
   Widget& set_layout(uint32_t layout) {
     if (m_obj)
       lv_obj_set_layout(m_obj, layout);
@@ -295,7 +395,47 @@ class Widget : public BaseWidget {
                            row_pos, row_span);
     return *this;
   }
+
+  /**
+     * @brief Registers a C++ callback for any event.
+     * The callback receives the raw lv_event_t*
+     */
+  Widget& on_event(lv_event_code_t event_code,
+                   std::function<void(lv_event_t*)> callback) {
+    if (m_obj) {
+      m_callbacks[event_code] = std::move(callback);
+      lv_obj_add_event_cb(m_obj, universal_event_handler, event_code, nullptr);
+    }
+    return *this;
+  }
+
+  /**
+     * @brief Helper for simple, argument-less callbacks.
+     * @param event_code The LVGL event code (e.g., LV_EVENT_CLICKED)
+     * @param callback A std::function with no arguments.
+     */
+  Widget& on_event(lv_event_code_t event_code, std::function<void()> callback) {
+    return on_event(event_code,
+                    [cb = std::move(callback)](lv_event_t* e) { cb(); });
+  }
+
+  // --- Specific Callback Helpers ---
+
+  Widget& on_clicked(std::function<void()> callback) {
+    return on_event(LV_EVENT_CLICKED, std::move(callback));
+  }
+
+  Widget& on_value_changed(std::function<void()> callback) {
+    return on_event(LV_EVENT_VALUE_CHANGED, std::move(callback));
+  }
+
+  Widget& on_pressed(std::function<void()> callback) {
+    return on_event(LV_EVENT_PRESSED, std::move(callback));
+  }
+
+  Widget& on_released(std::function<void()> callback) {
+    return on_event(LV_EVENT_RELEASED, std::move(callback));
+  }
 };
 
 }  // namespace LVGL_Wrapper
-

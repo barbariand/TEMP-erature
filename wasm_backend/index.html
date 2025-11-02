@@ -1,117 +1,110 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>LVGL C++/Rust/WASM App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      /* Basic styling - Center the canvas */
-      body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #333;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          Helvetica, Arial, sans-serif;
-        color: white;
-        overflow: hidden; /* Hide scrollbars */
-      }
 
-      /* Style the canvas to match your HAL's resolution (800x600) */
-      canvas {
-        width: 100%;
-        max-width: 800px;
-        /* Force aspect ratio to match internal resolution */
-        aspect-ratio: 800 / 600;
-        border: 1px solid #555;
-        background-color: #000;
-      }
-    </style>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>LVGL C++/Rust/WASM App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* Basic styling - Center the canvas */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      /* Hide scrollbars */
+    }
 
-  <body>
-    <!--
-      The CANVAS is the only element LVGL draws to.
-      Its internal `width` and `height` MUST match the LVGL/C++ configuration.
-    -->
-    <canvas id="canvas" width="800" height="600"></canvas>
+    /* Style the canvas to match your HAL's resolution (800x600) */
+    canvas {
+      width: 100%;
+      max-width: 800px;
+      /* Force aspect ratio to match internal resolution */
+      aspect-ratio: 800 / 600;
+      border: 1px solid #555;
+      background-color: #000;
+    }
+  </style>
+</head>
 
-    <script>
-      // 1. MODULE DEFINITION: Define the global 'Module' object before the WASM glue loads.
-      var Module = {};
+<body>
+  <canvas id="canvas" width="800" height="600"></canvas>
 
-      // FIX: Initialize the shared state object on the Module itself. This ensures
-      // the JS library can reliably access it without scope errors.
-      Module.JS_BRIDGE_STATE = {
-          ctx: null,
-          pressed: false,
-          x: 0,
-          y: 0,
-      };
+  <script>
+    // 1. MODULE DEFINITION
+    var Module = {};
 
-      // Attach the canvas element to the Module for the JS library to access.
-      Module.canvas = document.getElementById('canvas');
-      if (!Module.canvas) {
-        console.error("Fatal: Could not find <canvas id='canvas'>");
-      }
+    // Initialize the shared state object
+    Module.JS_BRIDGE_STATE = {
+      ctx: null,
+      pressed: false,
+      x: 0,
+      y: 0,
+    };
 
-      // 2. RUNTIME INITIALIZATION: This function is called once the WASM binary is loaded
-      // and the memory is initialized. This is the official starting point.
-      Module.onRuntimeInitialized = function () {
-        console.log('Emscripten module initialized. Starting app...');
+    // Attach the canvas element to the Module
+    Module.canvas = document.getElementById('canvas');
+    if (!Module.canvas) {
+      console.error("Fatal: Could not find <canvas id='canvas'>");
+    }
 
-        try {
-          // Check for and run the Rust/C++ setup function.
-          if (Module._run_app) {
-            Module._run_app(); // Calls your Rust entry point, which calls app_setup()
-            console.log('Rust/C++ `_run_app` called (app_setup complete).');
+    // 2. RUNTIME INITIALIZATION
+    Module.onRuntimeInitialized = function () {
+      console.log('Emscripten module initialized. Starting app...');
 
-            // 3. LVGL TICK LOOP (High frequency): This advances LVGL's internal clock
-            // and is crucial for timers and animations to work correctly.
-            // LVGL recommends 5-10ms intervals.
-            const LVGL_TICK_RATE_MS = 5;
-            if (Module._wasm_tick_inc) {
-                // IMPORTANT: setInterval prevents freezing by yielding control back to the browser.
-                setInterval(Module._wasm_tick_inc, LVGL_TICK_RATE_MS);
-                console.log(`Started LVGL tick interval (${LVGL_TICK_RATE_MS}ms).`);
-            } else {
-                 console.error("Error: _lv_tick_inc not exported. LVGL timers will fail.");
-            }
+      try {
+        // Check for and run the Rust/C++ setup function.
+        if (Module._run_app) {
+          Module._run_app(); // Calls your Rust entry point -> app_setup()
+          console.log('Rust/C++ `_run_app` called (app_setup complete).');
 
-            // 4. DISPLAY REFRESH LOOP (Browser Sync): Calls app_loop (which runs lv_timer_handler)
-            // on every browser frame refresh, preventing the main thread lockup.
-            function animate() {
-              if (Module._app_loop) {
-                // IMPORTANT: app_loop calls lv_timer_handler, processing all LVGL events.
-                Module._app_loop();
-              }
-              window.requestAnimationFrame(animate);
-            }
-            window.requestAnimationFrame(animate);
-            console.log('Started requestAnimationFrame loop for display updates.');
-
+          // 3. LVGL TICK LOOP
+          const LVGL_TICK_RATE_MS = 5;
+          if (Module._wasm_tick_inc) {
+            setInterval(Module._wasm_tick_inc, LVGL_TICK_RATE_MS);
+            console.log(`Started LVGL tick interval (${LVGL_TICK_RATE_MS}ms).`);
           } else {
-            console.error("Error: _run_app not found on Module. Check RUSTFLAGS export.");
-            console.log("Available Module keys:", Object.keys(Module));
+            console.error("Error: _wasm_tick_inc not exported. LVGL timers will fail.");
           }
-        } catch (e) {
-          console.error("Error starting Rust/C++ app:", e);
+
+          // 4. DISPLAY REFRESH LOOP
+          function animate() {
+            // --- THIS IS THE FIX ---
+            // Check for the function you actually exported: _run_loop
+            if (Module._run_loop) {
+              // Call _run_loop, which calls C++'s loop()
+              Module._run_loop();
+            }
+            // -----------------------
+            window.requestAnimationFrame(animate);
+          }
+          window.requestAnimationFrame(animate);
+          console.log('Started requestAnimationFrame loop for display updates.');
+
+        } else {
+          console.error("Error: _run_app not found on Module. Check RUSTFLAGS export.");
+          console.log("Available Module keys:", Object.keys(Module));
         }
-      };
+      } catch (e) {
+        console.error("Error starting Rust/C++ app:", e);
+      }
+    };
 
-      // Optional: Handle fatal errors
-      Module.onAbort = function (reason) {
-        console.error('WASM Aborted:', reason);
-        document.body.innerHTML = `<pre style="color: red; white-space: pre-wrap;">WASM Aborted: ${reason}</pre>`;
-      };
-    </script>
+    // Optional: Handle fatal errors
+    Module.onAbort = function (reason) {
+      console.error('WASM Aborted:', reason);
+      document.body.innerHTML = `<pre style="color: red; white-space: pre-wrap;">WASM Aborted: ${reason}</pre>`;
+    };
+  </script>
 
-    <!--
-      5. GLUE LOADING: Load the Emscripten-generated JS glue file.
-    -->
-    <script src="/wasm_backend/pkg/wasm_backend.js"></script>
-  </body>
+  <script src="/wasm_backend/pkg/wasm_backend.js"></script>
+</body>
+
 </html>

@@ -8,7 +8,7 @@
  */
 #include "LV_Helper.h"
 #include <Arduino.h>
-
+#include <lvgl.h>
 #if LVGL_VERSION_MAJOR == 9
 
 static lv_display_t* disp_drv;

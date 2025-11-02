@@ -24,6 +24,7 @@
             SDL_image
           ];
           packages = with pkgs; [
+            python3
             gdb
             cmake
             platformio
