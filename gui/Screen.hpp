@@ -4,9 +4,6 @@
 
 namespace LVGL_Wrapper {
 
-/**
- * @brief A heap-less singleton wrapper for the active screen.
- */
 class Screen final : public Widget {
  private:
   Screen() : Widget(nullptr) {}
@@ -20,10 +17,6 @@ class Screen final : public Widget {
   Screen(const Screen&) = delete;
   Screen& operator=(const Screen&) = delete;
 
-  /**
-     * @brief Gets the singleton instance of the Screen.
-     * *MUST* be called for the first time *after* lv_init().
-     */
   static Screen& getInstance() {
     if (!s_is_initialized) {
       s_instance.wrap(lv_scr_act());
@@ -35,7 +28,6 @@ class Screen final : public Widget {
     if (!m_obj)
       return nullptr;
 
-    // LVGL-funktion för att hämta displayen från vilket objekt som helst
     return lv_obj_get_disp(m_obj);
   }
   int horizontal_res() {

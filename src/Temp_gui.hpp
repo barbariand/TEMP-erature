@@ -3,7 +3,7 @@
 
 class TempGUI {
  public:
-  TempGUI() = default;  // All members are default-constructed
+  TempGUI() = default;
   ~TempGUI() = default;
 
   TempGUI(const TempGUI&) = delete;

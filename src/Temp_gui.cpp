@@ -53,7 +53,6 @@ void TempGUI::create_ui() {
     apply_tile_colors(m_t2, m_t2_label, false);
 
     m_t2.add_flag(LV_OBJ_FLAG_CLICKABLE)
-        .add_event_cb(TempGUI::on_tile2_clicked_static, LV_EVENT_CLICKED,
-                      this);  // Pass 'this' as user_data
+        .add_event_cb(TempGUI::on_tile2_clicked_static, LV_EVENT_CLICKED, this);
   }
 }

@@ -5,20 +5,12 @@ namespace LVGL_Wrapper {
 
 class Label : public Widget {
  public:
-  /**
-     * @brief Default constructor for two-stage init.
-     * This is public so std::make_unique<Label>() can call it.
-     */
   Label() : Widget() {}
-  /**
-     * @brief Creates the LVGL object. Called by parent.add_child<Label>().
-     */
   Label& create(BaseWidget& parent) {
     wrap(lv_label_create(parent.raw()));
     return *this;
   }
 
-  // --- Label-specific builder functions ---
 
   Label& set_text(const char* text) {
     if (m_obj)

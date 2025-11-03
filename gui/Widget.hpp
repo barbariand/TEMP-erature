@@ -11,12 +11,6 @@ extern "C" {
 
 namespace LVGL_Wrapper {
 
-/**
- * @brief Base class for all LVGL C++ wrappers.
- *
- * Manages the C++ object lifetime, C++ child object ownership,
- * and the C-to-C++ event callback bridge.
- */
 class BaseWidget {
  protected:
   lv_obj_t* m_obj;
@@ -40,26 +34,10 @@ class BaseWidget {
     }
   }
 
-  /**
-     * @brief Default constructor. Initializes as a null object.
-     */
   BaseWidget() : m_obj(nullptr) {}
 
-  /**
-     * @brief Protected constructor to wrap an existing object.
-     * Used by Screen singleton.
-     */
-  explicit BaseWidget(lv_obj_t* obj) : m_obj(obj) {
-    // Note: We call wrap() from the derived class (e.g., Screen::getInstance)
-    // because the vtable might not be ready here.
-    // For Screen, wrap() is called in getInstance().
-  }
+  explicit BaseWidget(lv_obj_t* obj) : m_obj(obj) {}
 
-  /**
-     * @brief Common wrapping logic.
-     * Sets user data to point to this C++ instance and
-     * hooks the internal delete handler.
-     */
   void wrap(lv_obj_t* obj) {
     m_obj = obj;
     if (m_obj) {
@@ -70,16 +48,6 @@ class BaseWidget {
   }
 
  public:
-  /**
-     * @brief Virtual destructor.
-     *
-     * If the C++ wrapper is destroyed (e.g., goes out of scope)
-     * and the LVGL object still exists (m_obj != nullptr),
-     * we delete the LVGL object. This will trigger a cascade
-     * of LV_EVENT_DELETE events for all children, which
-     * our universal_event_handler will catch, nulling out
-     * the m_obj pointers in the child C++ wrappers.
-     */
   virtual ~BaseWidget() {
     m_children.clear();
 
@@ -91,27 +59,11 @@ class BaseWidget {
     }
   }
 
-  // Delete copy/move to prevent slicing and ownership issues
   BaseWidget(const BaseWidget&) = delete;
   BaseWidget& operator=(const BaseWidget&) = delete;
 
-  /**
-     * @brief Gets the raw lv_obj_t pointer.
-     */
   lv_obj_t* raw() const { return m_obj; }
 
-  /**
-     * @brief Creates, adds, and stores a new C++ child widget.
-     *
-     * This is the new primary way to create widgets.
-     *
-     * @tparam T The C++ Wrapper type (e.g., Label, Button)
-     * @return A reference to the newly created child widget for chaining.
-     * @example
-     * screen.add_child<Label>()
-     * .set_text("Hello")
-     * .align(LV_ALIGN_CENTER, 0, 0);
-     */
   template <typename T>
   T& add_child() {
     auto child_ptr = std::make_unique<T>();
@@ -123,18 +75,12 @@ class BaseWidget {
     return child_ref;
   }
 
-  /**
-     * @brief Gets the C++ wrapper from a raw lv_obj_t*.
-     */
   static BaseWidget* get_wrapper(lv_obj_t* obj) {
     if (!obj)
       return nullptr;
     return static_cast<BaseWidget*>(lv_obj_get_user_data(obj));
   }
 
-  /**
-     * @brief Gets the C++ wrapper and dynamic_casts it to type T.
-     */
   template <typename T>
   static T* get_wrapper_as(lv_obj_t* obj) {
     return dynamic_cast<T*>(get_wrapper(obj));
@@ -143,20 +89,12 @@ class BaseWidget {
 
 class Widget : public BaseWidget {
  protected:
-  /**
-   * @brief Default constructor for two-stage init.
-   */
   Widget() : BaseWidget(nullptr) {}
 
-  /**
-   * @brief Protected constructor to wrap an existing object.
-   */
   explicit Widget(lv_obj_t* obj) : BaseWidget(obj) {}
 
  public:
   virtual ~Widget() {}
-
-  // --- Position & Alignment ---
 
   Widget& set_pos(lv_coord_t x, lv_coord_t y) {
     if (m_obj)
@@ -196,8 +134,6 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  // --- Size ---
-
   Widget& set_size(lv_coord_t w, lv_coord_t h) {
     if (m_obj)
       lv_obj_set_size(m_obj, w, h);
@@ -228,8 +164,6 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  // --- Flags & State ---
-
   Widget& add_flag(lv_obj_flag_t f) {
     if (m_obj)
       lv_obj_add_flag(m_obj, f);
@@ -254,15 +188,11 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  // --- Hierarchy ---
-
   Widget& set_parent(BaseWidget& parent) {
     if (m_obj)
       lv_obj_set_parent(m_obj, parent.raw());
     return *this;
   }
-
-  // --- Scrolling ---
 
   Widget& set_scrollbar_mode(lv_scrollbar_mode_t mode) {
     if (m_obj)
@@ -276,16 +206,12 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  // --- Events ---
-
   Widget& add_event_cb(lv_event_cb_t event_cb, lv_event_code_t filter,
                        void* user_data) {
     if (m_obj)
       lv_obj_add_event_cb(m_obj, event_cb, filter, user_data);
     return *this;
   }
-
-  // --- Local Styles (Common) ---
 
   Widget& set_style_bg_color(lv_color_t color,
                              lv_style_selector_t selector = LV_PART_MAIN) {
@@ -396,10 +322,6 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  /**
-     * @brief Registers a C++ callback for any event.
-     * The callback receives the raw lv_event_t*
-     */
   Widget& on_event(lv_event_code_t event_code,
                    std::function<void(lv_event_t*)> callback) {
     if (m_obj) {
@@ -409,17 +331,10 @@ class Widget : public BaseWidget {
     return *this;
   }
 
-  /**
-     * @brief Helper for simple, argument-less callbacks.
-     * @param event_code The LVGL event code (e.g., LV_EVENT_CLICKED)
-     * @param callback A std::function with no arguments.
-     */
   Widget& on_event(lv_event_code_t event_code, std::function<void()> callback) {
     return on_event(event_code,
                     [cb = std::move(callback)](lv_event_t* e) { cb(); });
   }
-
-  // --- Specific Callback Helpers ---
 
   Widget& on_clicked(std::function<void()> callback) {
     return on_event(LV_EVENT_CLICKED, std::move(callback));
