@@ -29,6 +29,7 @@
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
 #include "./widgets/Label.hpp"
+#include "./widgets/Line.hpp"
 #include "./widgets/Menu.hpp"
 #include "./widgets/MenuCont.hpp"
 #include "./widgets/MenuPage.hpp"
