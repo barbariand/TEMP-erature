@@ -7,6 +7,7 @@
 namespace LVGL_Wrapper {
 
 class Label : public Widget, public TextProperties<Label> {
+  friend class List;
 
  private:
   explicit Label(BaseWidget* parent) : Widget(lv_label_create, parent) {}

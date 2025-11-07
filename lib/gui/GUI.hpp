@@ -33,6 +33,7 @@
 #include "./widgets/Label.hpp"
 #include "./widgets/Led.hpp"
 #include "./widgets/Line.hpp"
+#include "./widgets/List.hpp"
 #include "./widgets/Menu.hpp"
 #include "./widgets/MenuCont.hpp"
 #include "./widgets/MenuPage.hpp"

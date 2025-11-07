@@ -6,6 +6,7 @@ namespace LVGL_Wrapper {
 
 class Button : public Widget, public TextProperties<Button> {
 
+  friend class List;
 
  private:
   explicit Button(BaseWidget* parent) : Widget(lv_button_create, parent) {}
