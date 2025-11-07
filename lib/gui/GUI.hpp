@@ -40,6 +40,7 @@
 #include "./widgets/Spinbox.hpp"
 #include "./widgets/Spinner.hpp"
 #include "./widgets/Tab.hpp"
+#include "./widgets/Table.hpp"
 #include "./widgets/Tabview.hpp"
 #include "./widgets/Tile.hpp"
 #include "./widgets/Tileview.hpp"
