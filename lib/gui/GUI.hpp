@@ -1,5 +1,7 @@
 #pragma once
 // Include core types first
+#include "./types/CalendarDate.hpp"
+#include "./types/ChartSeries.hpp"
 #include "./types/Color.hpp"
 #include "./types/Enums.hpp"
 #include "./types/StyleSelector.hpp"
@@ -20,6 +22,8 @@
 #include "./widgets/Bar.hpp"
 #include "./widgets/Button.hpp"
 #include "./widgets/ButtonMatrix.hpp"
+#include "./widgets/Calendar.hpp"
+#include "./widgets/Canvas.hpp"
 #include "./widgets/Checkbox.hpp"
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
