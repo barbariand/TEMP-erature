@@ -29,6 +29,7 @@
 #include "./widgets/Dropdown.hpp"
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
+#include "./widgets/Keyboard.hpp"
 #include "./widgets/Label.hpp"
 #include "./widgets/Line.hpp"
 #include "./widgets/Menu.hpp"
