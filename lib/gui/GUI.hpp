@@ -25,6 +25,7 @@
 #include "./widgets/Calendar.hpp"
 #include "./widgets/Canvas.hpp"
 #include "./widgets/Checkbox.hpp"
+#include "./widgets/Dropdown.hpp"
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
 #include "./widgets/Label.hpp"
