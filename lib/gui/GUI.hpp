@@ -19,6 +19,8 @@
 #include "./widgets/Arc.hpp"
 #include "./widgets/Bar.hpp"
 #include "./widgets/Button.hpp"
+#include "./widgets/ButtonMatrix.hpp"
+#include "./widgets/Checkbox.hpp"
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
 #include "./widgets/Label.hpp"
