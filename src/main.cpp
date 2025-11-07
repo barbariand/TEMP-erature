@@ -1,5 +1,4 @@
 #include <lvgl.h>
-#include <time.h>
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
@@ -14,7 +13,6 @@ void handle_sigterm(int signum) {
 }
 #endif
 
-// Function: Connects to WIFI
 void connect_wifi() {
   // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
   // WiFi.mode(WIFI_STA);

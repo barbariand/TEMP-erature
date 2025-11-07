@@ -1,32 +1,33 @@
 #pragma once
 #include <GUI.hpp>
+#include <memory>
+#include "core/Component.hpp"
+
+using namespace LVGL_Wrapper;
 
 class TempGUI {
- public:
-  TempGUI() = default;
-  ~TempGUI() = default;
+public:
+    TempGUI() = default;
+    ~TempGUI() = default;
 
-  TempGUI(const TempGUI&) = delete;
-  TempGUI& operator=(const TempGUI&) = delete;
+    TempGUI(const TempGUI&) = delete;
+    TempGUI& operator=(const TempGUI&) = delete;
 
-  /**
-   * @brief Call this *after* lv_init() to build the UI.
-   */
-  void create_ui();
+    void create_ui();
 
- private:
-  void apply_tile_colors(LVGL_Wrapper::Widget& tile,
-                         LVGL_Wrapper::Widget& label, bool dark);
-  static void on_tile2_clicked_static(lv_event_t* e);
-  void on_tile2_clicked_member();
+private:
+    void apply_tile_colors(Widget& tile, Label& label, bool dark);
+    void on_tile2_clicked_member();
 
-  // All wrapper objects are members (no heap).
-  // They are "empty" until create_ui() is called.
-  LVGL_Wrapper::Tileview m_tileview;
-  LVGL_Wrapper::Label m_t1_label;
-  LVGL_Wrapper::Label m_t2_label;
-  LVGL_Wrapper::Tile m_t1;
-  LVGL_Wrapper::Tile m_t2;
+    std::shared_ptr<Tileview> m_tileview;
+    std::shared_ptr<Label> m_t1_label;
+    std::shared_ptr<Label> m_t2_label;
+    std::shared_ptr<Tile> m_t1;
+    std::shared_ptr<Tile> m_t2;
 
-  bool m_t2_dark = false;
+    bool m_t2_dark = false;
+};
+
+class StartScreen: public Component{
+  std::shared_ptr<Label> group_name;
 };
