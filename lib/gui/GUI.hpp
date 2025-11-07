@@ -14,7 +14,10 @@
 #include "./widgets/mixins/TextProperties.hpp"
 
 // Include all widgets
+#include "./widgets/AnimImage.hpp"
 #include "./widgets/Button.hpp"
+#include "./widgets/Image.hpp"
+#include "./widgets/ImageButton.hpp"
 #include "./widgets/Label.hpp"
 #include "./widgets/Tile.hpp"
 #include "./widgets/Tileview.hpp"
