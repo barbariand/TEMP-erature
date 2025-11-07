@@ -8,6 +8,8 @@
 namespace LVGL_Wrapper {
 
 class Widget : public BaseWidget {
+  friend class WrappedWidget;
+
  protected:
   Widget(LvCreateFunc create_func, BaseWidget* parent)
       : BaseWidget(create_func, parent) {}

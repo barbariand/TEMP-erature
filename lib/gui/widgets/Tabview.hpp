@@ -40,7 +40,7 @@ class Tabview : public Widget {
       return std::static_pointer_cast<Widget>(wrapper->shared_from_this());
     }
 
-    auto page_ptr = std::shared_ptr<Widget>(new Widget(c_page, this));
+    auto page_ptr = std::shared_ptr<Tab>(new Tab(this, c_page));
     this->register_child(page_ptr);
     return page_ptr;
   }

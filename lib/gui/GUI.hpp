@@ -38,6 +38,7 @@
 #include "./widgets/MenuCont.hpp"
 #include "./widgets/MenuPage.hpp"
 #include "./widgets/MenuSection.hpp"
+#include "./widgets/MessageBox.hpp"
 #include "./widgets/Roller.hpp"
 #include "./widgets/Scale.hpp"
 #include "./widgets/Slider.hpp"
