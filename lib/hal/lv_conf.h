@@ -3,7 +3,7 @@
  * Configuration file for v9.2.2
  *
  * This file is based on the default v9.2.2 template
- */
+ * */
 
 /*
  * Copy this file as `lv_conf.h`
@@ -13,11 +13,12 @@
  * - add the path as include path
  */
 
-#if 1
+#if 1 /*Set it to "1" to enable content*/
 
 #ifndef LV_CONF_H
 #define LV_CONF_H
 
+/*If you need to include anything here, do it inside the `__ASSEMBLY__` guard */
 #if 0 && defined(__ASSEMBLY__)
 #include "my_include.h"
 #endif

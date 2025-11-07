@@ -7,23 +7,22 @@
  *
  */
 
-
 #pragma once
 #if defined(LILYGO_BUILD)
 #include <Arduino.h>
 #include <freertos/queue.h>
 
 struct InputData {
-    char id;        // 'm' = mouse ,'k' = keyboard
-    char key;
-    bool left;
-    bool right;
-    int x;
-    int y;
+  char id;  // 'm' = mouse ,'k' = keyboard
+  char key;
+  bool left;
+  bool right;
+  int x;
+  int y;
 };
 
 struct InputParams {
-    QueueHandle_t queue;
-    const void *icon;
+  QueueHandle_t queue;
+  const void* icon;
 };
 #endif

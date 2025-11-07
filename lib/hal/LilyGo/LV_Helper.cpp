@@ -1,3 +1,4 @@
+#if defined(LILYGO_BUILD)
 /**
  * @file      LV_Helper_v9.cpp
  * @author    Lewis He (lewishe@outlook.com)
@@ -175,4 +176,5 @@ void beginLvglInputDevice(struct InputParams prams) {
   }
 }
 
+#endif
 #endif
