@@ -24,6 +24,7 @@
 #include "./widgets/ButtonMatrix.hpp"
 #include "./widgets/Calendar.hpp"
 #include "./widgets/Canvas.hpp"
+#include "./widgets/Chart.hpp"
 #include "./widgets/Checkbox.hpp"
 #include "./widgets/Dropdown.hpp"
 #include "./widgets/Image.hpp"
