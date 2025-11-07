@@ -11,10 +11,13 @@
 #include "./core/Widget.hpp"
 
 // Include the mixins
+#include "./widgets/mixins/PartIndicatorProperties.hpp"
 #include "./widgets/mixins/TextProperties.hpp"
 
 // Include all widgets
 #include "./widgets/AnimImage.hpp"
+#include "./widgets/Arc.hpp"
+#include "./widgets/Bar.hpp"
 #include "./widgets/Button.hpp"
 #include "./widgets/Image.hpp"
 #include "./widgets/ImageButton.hpp"
