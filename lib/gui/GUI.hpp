@@ -37,5 +37,7 @@
 #include "./widgets/MenuSection.hpp"
 #include "./widgets/Scale.hpp"
 #include "./widgets/Slider.hpp"
+#include "./widgets/Spinbox.hpp"
+#include "./widgets/Spinner.hpp"
 #include "./widgets/Tile.hpp"
 #include "./widgets/Tileview.hpp"
