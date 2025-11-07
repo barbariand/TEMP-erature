@@ -5,6 +5,7 @@ namespace LVGL_Wrapper {
 
 class WrappedWidget : public Widget {
   friend class MessageBox;
+  friend class Window;
 
  private:
   explicit WrappedWidget(lv_obj_t* obj_to_wrap) : Widget(obj_to_wrap) {}

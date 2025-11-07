@@ -7,6 +7,7 @@ namespace LVGL_Wrapper {
 class Button : public Widget, public TextProperties<Button> {
 
   friend class List;
+  friend class Window;
   friend class MessageBox;
 
  private:

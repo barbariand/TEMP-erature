@@ -51,3 +51,4 @@
 #include "./widgets/TextArea.hpp"
 #include "./widgets/Tile.hpp"
 #include "./widgets/Tileview.hpp"
+#include "./widgets/Window.hpp"

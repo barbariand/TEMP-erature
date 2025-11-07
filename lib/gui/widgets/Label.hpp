@@ -8,6 +8,7 @@ namespace LVGL_Wrapper {
 
 class Label : public Widget, public TextProperties<Label> {
   friend class List;
+  friend class Window;
   friend class MessageBox;
 
  private:
