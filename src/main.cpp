@@ -3,7 +3,7 @@
 #include <csignal>
 #include <iostream>
 #include "Temp_gui.hpp"
-#include "wifi.h"
+#include "wifi_cred.h"
 static TempGUI* gui;
 static hal::Display* amoled;
 volatile sig_atomic_t exit_flag = 0;  // Global flag

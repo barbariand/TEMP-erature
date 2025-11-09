@@ -16,8 +16,8 @@ fn main() {
         .canonicalize()
         .unwrap();
 
-    let hal_dir = project_root.join("hal");
-    let gui_dir = project_root.join("gui");
+    let hal_dir = project_root.join("lib/hal");
+    let gui_dir = project_root.join("lib/gui");
 
     let pio_lvgl_path = project_root.join(Path::new(".pio/libdeps/native/lvgl"));
 
@@ -56,7 +56,7 @@ fn main() {
         .opt_level(1)
         .include(&lvgl_vendor_path)
         .include(&project_root)
-        .define("LV_CONF_PATH", "\"hal/lv_conf.h\"")
+        .define("LV_CONF_PATH", "\"lib/hal/lv_conf.h\"")
         .define("WASM_BUILD", None);
 
     let c_src_pattern = lvgl_vendor_path.join("src/**/*.c");
@@ -76,7 +76,7 @@ fn main() {
         )
         .clang_arg(format!("-I{}", project_root.display()))
         .clang_arg(format!("-I{}", lvgl_vendor_path.display()))
-        .clang_arg("-DLV_CONF_PATH=\"hal/lv_conf.h\"")
+        .clang_arg("-DLV_CONF_PATH=\"lib/hal/lv_conf.h\"")
         .clang_arg("-DWASM_BUILD")
         .clang_arg("--target=wasm32-unknown-emscripten")
         .clang_arg(format!("-isystem{}", em_include_path.display()))
@@ -115,19 +115,19 @@ fn main() {
         .include(&em_musl_include_path)
         .include(&em_musl_arch_include_path)
         .define("WASM_BUILD", None)
-        .define("LV_CONF_PATH", "\"hal/lv_conf.h\"")
+        .define("LV_CONF_PATH", "\"lib/hal/lv_conf.h\"")
         .include(&lvgl_vendor_path)
         .include(&project_root)
         .include(&hal_dir)
         .include(&gui_dir)
         .include(project_root.join("wasm_backend/include_stubs"))
-        .file(project_root.join("hal/WASMDisplay.cpp"));
+        .file(project_root.join("lib/hal/WASMDisplay.cpp"));
 
     let c_src_pattern = project_root.join("src/**/*.cpp");
     for entry in glob::glob(c_src_pattern.to_str().unwrap()).unwrap() {
         app.file(entry.unwrap());
     }
-    let c_src_pattern = project_root.join("gui/**/*.cpp");
+    let c_src_pattern = gui_dir.join("**/*.cpp");
     for entry in glob::glob(c_src_pattern.to_str().unwrap()).unwrap() {
         let path = entry.unwrap();
         println!("adding file: {:?}", path);

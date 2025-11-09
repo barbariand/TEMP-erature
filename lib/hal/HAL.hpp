@@ -1,7 +1,5 @@
-
 #pragma once
 #include "IDisplay.hpp"
-
 #include "Display.hpp"
 
 namespace hal {
@@ -20,7 +18,7 @@ inline void sleep(int sleep_delay);
 #include <WiFi.h>
 #include <lvgl.h>
 #include "./LilyGo/LilyGo_AMOLED.h"
-#include "EPS32Helper.hpp"
+#include "ESP32Helper.hpp"
 #include "LilyGo/LV_Helper.h"
 #elif defined(SDL_BUILD)
 #include "SDLHelper.hpp"

@@ -1,6 +1,5 @@
 #include "Temp_gui.hpp"
 #include <iostream>
-#include "lvgl.h"
 
 using namespace LVGL_Wrapper;
 

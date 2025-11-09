@@ -1,4 +1,8 @@
 #pragma once
+
+extern "C" {
+#include "lvgl.h"
+}
 // Include core types first
 #include "./types/CalendarDate.hpp"
 #include "./types/ChartSeries.hpp"

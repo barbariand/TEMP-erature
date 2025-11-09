@@ -2,7 +2,7 @@
 
 #ifdef WASM_BUILD
 
-#include "hal/IDisplay.hpp"
+#include "IDisplay.hpp"
 #include "lvgl.h"
 extern "C" {
 
