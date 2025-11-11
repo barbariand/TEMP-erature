@@ -11,6 +11,8 @@
 // Wi-Fi credentials (Delete these before commiting to GitHub)
 static const char *WIFI_SSID = "SSID";
 static const char *WIFI_PASSWORD = "PWD";
+static uint32_t wifi_backoff_ms = 5000;
+static uint32_t wifi_next_attempt =0;
 
 LilyGo_Class amoled;
 
@@ -92,6 +94,43 @@ static void connect_wifi() {
   }
 }
 
+static void wifi_reconnect_backoff(){
+  if(WiFi.status() == WL_CONNECTED){
+    wifi_backoff_ms = 5000;
+    return;
+  }
+
+  uint32_t now = millis();
+  if(now < wifi_next_attempt){
+    return;
+  }
+
+  Serial.println("Wifi reconnecting...");
+
+  WiFi.disconnect(true);
+  delay(50);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+{}
+   const uint32_t start = millis();
+  while (WiFi.status() != WL_CONNECTED && (millis() - start) < 30000) {
+    delay(250);
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("WiFi reconnected.");
+    wifi_backoff_ms = 5000;
+    wifi_next_attempt = now + 10000;
+    }
+    else{
+      wifi_next_attempt = now + wifi_backoff_ms;
+      wifi_backoff_ms *= 2;
+      if(wifi_backoff_ms > 120000){
+        wifi_backoff_ms = 120000;
+      }
+    }
+}
+
 // Must have function: Setup is run once on startup
 void setup() {
   Serial.begin(115200);
@@ -111,6 +150,8 @@ void setup() {
 
 // Must have function: Loop runs continously on device after setup
 void loop() {
+  wifi_reconnect_backoff();
+  
   int sleep_delay = lv_timer_handler();
   delay(sleep_delay);
 }
