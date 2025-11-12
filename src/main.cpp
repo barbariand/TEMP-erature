@@ -24,7 +24,7 @@ static lv_obj_t *chart_obj;
 static lv_chart_series_t *series; 
 static bool t2_dark = false; // start tile #2 in light mode
 
-#define POINT_COUNT 50
+#define POINT_COUNT 60
 static int16_t chart_data[POINT_COUNT];
 
 // Function: Tile #2 Color change
