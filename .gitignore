@@ -3,14 +3,13 @@
 .vscode
 *.pyc
 build
+# Files relevant to CMAKE for local version
+.cache
+libdeps/*
 compile_commands.json
 # nix lang ignores
-.cache
 .envrc
 .direnv
 
-wasm_backend/pkg
-wasm_backend/target
-target/
 # macOS
 .DS_Store
