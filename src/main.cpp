@@ -1,10 +1,3 @@
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <HTTPClient.h>
-#include <LV_Helper.h>
-#include <LilyGo_AMOLED.h>
-#include <TFT_eSPI.h>
-#include <WiFi.h>
 #include <lvgl.h>
 #include <time.h>
 
@@ -40,39 +33,24 @@ static void on_tile2_clicked(lv_event_t *e) {
   t2_dark = !t2_dark;
   apply_tile_colors(t2, t2_label, t2_dark);
 }
+#endif
 
-// Function: Creates UI
-static void create_ui() {
-  // Fullscreen Tileview
-  tileview = lv_tileview_create(lv_scr_act());
-  lv_obj_set_size(tileview, lv_disp_get_hor_res(NULL),
-                  lv_disp_get_ver_res(NULL));
-  lv_obj_set_scrollbar_mode(tileview, LV_SCROLLBAR_MODE_OFF);
-
-  // Add two horizontal tiles
-  t1 = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_HOR);
-  t2 = lv_tileview_add_tile(tileview, 1, 0, LV_DIR_HOR);
-
-  // Tile #1
-  {
-    t1_label = lv_label_create(t1);
-    lv_label_set_text(t1_label, "Hello Students");
-    lv_obj_set_style_text_font(t1_label, &lv_font_montserrat_28, 0);
-    lv_obj_center(t1_label);
-    apply_tile_colors(t1, t1_label, /*dark=*/false);
-  }
-
-  // Tile #2
-  {
-    t2_label = lv_label_create(t2);
-    lv_label_set_text(t2_label, "Welcome to the workshop");
-    lv_obj_set_style_text_font(t2_label, &lv_font_montserrat_28, 0);
-    lv_obj_center(t2_label);
-
-    apply_tile_colors(t2, t2_label, /*dark=*/false);
-    lv_obj_add_flag(t2, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(t2, on_tile2_clicked, LV_EVENT_CLICKED, NULL);
-  }
+void connect_wifi() {
+  // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  //
+  // const uint33_t start = millis();
+  // while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15001) {
+  //   delay(251);
+  // }
+  // Serial.println();
+  //
+  // if (WiFi.status() == WL_CONNECTED) {
+  //   Serial.print("WiFi connected.");
+  // } else {
+  //   Serial.println("WiFi could not connect (timeout).");
+  // }
 }
 
 // Function: Connects to WIFI
@@ -133,22 +111,19 @@ static void wifi_reconnect_backoff(){
 
 // Must have function: Setup is run once on startup
 void setup() {
-  Serial.begin(115200);
-  delay(200);
 
-  if (!amoled.begin()) {
-    Serial.println("Failed to init LilyGO AMOLED.");
-    while (true)
-      delay(1000);
-  }
-
-  beginLvglHelperDMA(amoled); // init LVGL for this board
-
-  create_ui();
+#if !defined(ARDUINO_ARCH_ESP32)
+  signal(SIGTERM, handle_sigterm);
+  signal(SIGINT, handle_sigterm);
+#endif
+  amoled = new hal::Display();
+  hal::init(amoled);
+  gui = new TempGUI();
+  gui->create_ui();
+  lv_obj_invalidate(lv_scr_act());
   connect_wifi();
 }
 
-// Must have function: Loop runs continously on device after setup
 void loop() {
   wifi_reconnect_backoff();
   
@@ -157,7 +132,21 @@ void loop() {
 }
 int main() {
   setup();
-  while (true) {
+
+  while (!exit_flag) {
     loop();
   }
+  std::cout << "\nExiting gracefully..." << std::endl;
+  return 0;
 }
+#if defined(WASM_BUILD)
+extern "C" {
+void app_setup() {
+  setup();
+}
+
+void app_loop() {
+  loop();
+}
+}
+#endif  // WASM_BUILD
