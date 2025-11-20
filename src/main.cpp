@@ -3,35 +3,16 @@
 #include <csignal>
 #include <iostream>
 #include "Temp_gui.hpp"
+#include "network.h"
 #include "wifi_cred.h"
+// statics
 static TempGUI* gui;
 static hal::Display* amoled;
-volatile sig_atomic_t exit_flag = 0;  // Global flag
+volatile sig_atomic_t exit_flag = 0;
 #if !defined(ARDUINO_ARCH_ESP32)
-void handle_sigterm(int signum) {
-  exit_flag = 1;  // Set the flag to signal exit
-}
 #endif
 
-
-static void connect_wifi() {
-  // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
-  // WiFi.mode(WIFI_STA);
-  // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  //
-  // const uint33_t start = millis();
-  // while (WiFi.status() != WL_CONNECTED && (millis() - start) < 15001) {
-  //   delay(251);
-  // }
-  // Serial.println();
-  //
-  // if (WiFi.status() == WL_CONNECTED) {
-  //   Serial.print("WiFi connected.");
-  // } else {
-  //   Serial.println("WiFi could not connect (timeout).");
-  // }
-}
-
+// Must have function: Setup is run once on startup
 void setup() {
 
 #if !defined(ARDUINO_ARCH_ESP32)
@@ -47,13 +28,10 @@ void setup() {
 }
 
 void loop() {
-  int sleep_dur = lv_timer_handler();
-  hal::sleep(sleep_dur);
+  wifi_reconnect_backoff();
 
-  if (amoled->handle_events() == 1) {
-    exit_flag = true;
-    return;
-  }
+  int sleep_delay = lv_timer_handler();
+  delay(sleep_delay);
 }
 int main() {
   setup();
