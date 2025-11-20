@@ -14,6 +14,7 @@ void handle_sigterm(int signum) {
 #endif
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Function: Tile #2 Color change
 static void apply_tile_colors(lv_obj_t* tile, lv_obj_t* label, bool dark) {
   std::cout << "lets goooooooo changing colour" << std::endl;
@@ -81,6 +82,9 @@ static void create_ui() {
 
 // Function: Connects to WIFI
 static void connect_wifi() {
+=======
+void connect_wifi() {
+>>>>>>> f0a8c8361958a75547535775673c8d9f5626f6d9
 =======
 void connect_wifi() {
 >>>>>>> f0a8c8361958a75547535775673c8d9f5626f6d9
