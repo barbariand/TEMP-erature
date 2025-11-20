@@ -3,8 +3,7 @@
 #include <csignal>
 #include <iostream>
 #include "Temp_gui.hpp"
-#include "network.h"
-#include "wifi_cred.h"
+#include "network/network.h"
 // statics
 static TempGUI* gui;
 static hal::Display* amoled;
@@ -15,10 +14,6 @@ volatile sig_atomic_t exit_flag = 0;
 // Must have function: Setup is run once on startup
 void setup() {
 
-#if !defined(ARDUINO_ARCH_ESP32)
-  signal(SIGTERM, handle_sigterm);
-  signal(SIGINT, handle_sigterm);
-#endif
   amoled = new hal::Display();
   hal::init(amoled);
   gui = new TempGUI();
@@ -29,9 +24,8 @@ void setup() {
 
 void loop() {
   wifi_reconnect_backoff();
-
   int sleep_delay = lv_timer_handler();
-  delay(sleep_delay);
+  hal::sleep(sleep_delay);
 }
 int main() {
   setup();
