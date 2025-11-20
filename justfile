@@ -1,75 +1,76 @@
+# Justfile provided by Ludvig copyright 2025
+set shell := ["bash", "-uc"]
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
-## Print the current build environment details (Nix variables)
-@env-info:
-    @echo "--- Environment Check ---"
-    @echo "SDL Include Path: $(SDL2_INCLUDE_PATH)"
-    @echo "SDL Library Path: $(SDL2_LIBRARY_PATH)"
-    @echo "Arduino Dir: $(Arduino_DIR)"
-    @echo "PlatformIO Version:"
-    @pio --version
-    @echo "--- Nix Shell Active ---"
+[positional-arguments, private, unix]
+@write *args="":
+  echo "$@"
 
-## Remove all built files, including dependencies and libraries.
-@clean:
-    @echo "Cleaning all build artifacts for all environments..."
-    pio run --target clean
-    @echo "Cleaning library dependencies..."
-    rm -rf .pio/libdeps
+[positional-arguments, private, windows]
+@write *args="":
+  Write-Host "$@"
 
-@clangd:
-  @pio run -t compiledb
+[private]
+clean_pio:
+  @just write Cleaning build files
+  pio run --target clean
 
-@clangd-native:
-  @pio run -t compiledb -e native
-#-----------------------------------------------------------------------------
-# NATIVE BUILD & RUN (SDL)
-#-----------------------------------------------------------------------------
+[private, no-exit-message]
+clean_libdeps:
+  @just write Cleaning dependencies recursively
+  rm -r .pio/libdeps
+# list all resepiec
+default:
+  just --list
+# Clean the pio dependencies, libraries, and build files
+clean: clean_pio clean_libdeps
 
-## Build the native executable (desktop simulation).
-@native:
-    @echo "Building native environment (SDL)..."
+# Generate compile_commands.json
+compile_commands:
+  pio run -t compiledb
+
+# Generate compile_commands.json for the native target
+compile_commands_native:
+  pio run -t compiledb -e native
+
+# Build native environment
+build-native:
+    @just write Building native environment
     pio run -e native
-    @echo "Native build complete. Run 'just run' to execute."
+    @just write Native build complete. Run 'just run' to execute.
 
-## Run the compiled native executable (only works after 'just native').
-# Assumes the executable is named 'program' in the native build folder.
-@run:
-    @just native || exit 1 # Ensure build succeeds before running
-    @echo "Executing native program..."
-    ./.pio/build/native/program
-    @echo "Execution finished."
+# Run the natively compiled binary
+run-native:
+  @just write Executing native build
+  ./.pio/build/native/program
+  @just write Execution finished.
 
-#-----------------------------------------------------------------------------
-# EMBEDDED BUILD & UPLOAD (ESP32 - Temp)
-#-----------------------------------------------------------------------------
+# Build and run the native environment
+native: build-native run-native
 
-## Build the firmware for the ESP32 (Temp environment).
-@build-temp:
-    @echo "Building ESP32 environment (Temp)..."
-    pio run -e Temp
+# Build ESP32 environment
+build-esp32:
+  @just write Building ESP32 environment
+  pio run -e esp32
+  @just write ESP32 build complete. Run 'just upload' to upload to ESP32.
 
-## Upload the compiled firmware to the T-Display-AMOLED board.
-# Checks for the expected port before attempting upload.
-@upload:
-    @if [ ! -e /dev/ttyACM0 ]; then \
-        echo "ERROR: /dev/ttyACM0 (T-Display-AMOLED) does not exist."; \
-        echo "Check USB connection or port name."; \
-        exit 1; \
+# Upload to ESP32 (T-Display-AMOLED)
+[linux]
+upload:
+    #!/usr/bin/env bash
+    if [ ! -e /dev/ttyACM0 ]; then
+        @just write ERROR: /dev/ttyACM0 \(T-Display-AMOLED\) does not exist.
+        @just write Check USB connection or port name.
+        exit 1
     fi
-    @echo "Uploading to /dev/ttyACM0..."
+    @just write Uploading to /dev/ttyACM0...
     pio run --target upload --upload-port /dev/ttyACM0
 
-## Open the serial monitor for the Temp environment.
-@monitor:
-    @echo "Starting serial monitor..."
-    pio device monitor -e Temp
+# Open the serial monitor for the esp32 environment.
+monitor:
+    @just write Starting serial monitor...
+    pio device monitor -e esp32
 
-#-----------------------------------------------------------------------------
-# COMBINED/UTILITY
-#-----------------------------------------------------------------------------
-
-## Builds the ESP32 target, uploads it, and starts the serial monitor.
-@deploy:
-    @just build-temp
-    @just upload
-    @just monitor
+# Builds the ESP32 target, uploads it, and starts the serial monitor.
+[linux]
+deploy: build-esp32 upload monitor

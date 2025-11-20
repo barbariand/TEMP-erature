@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>LVGL C++/Rust/WASM App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* Basic styling - Center the canvas */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      /* Hide scrollbars */
+    }
+
+    /* Style the canvas to match your HAL's resolution (800x600) */
+    canvas {
+      width: 100%;
+      max-width: 800px;
+      /* Force aspect ratio to match internal resolution */
+      aspect-ratio: 800 / 600;
+      border: 1px solid #555;
+      background-color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="600"></canvas>
+
+  <script>
+    // 1. MODULE DEFINITION
+    var Module = {};
+
+    // Initialize the shared state object
+    Module.JS_BRIDGE_STATE = {
+      ctx: null,
+      pressed: false,
+      x: 0,
+      y: 0,
+    };
+
+    // Attach the canvas element to the Module
+    Module.canvas = document.getElementById('canvas');
+    if (!Module.canvas) {
+      console.error("Fatal: Could not find <canvas id='canvas'>");
+    }
+
+    // 2. RUNTIME INITIALIZATION
+    Module.onRuntimeInitialized = function () {
+      console.log('Emscripten module initialized. Starting app...');
+
+      try {
+        // Check for and run the Rust/C++ setup function.
+        if (Module._run_app) {
+          Module._run_app(); // Calls your Rust entry point -> app_setup()
+          console.log('Rust/C++ `_run_app` called (app_setup complete).');
+
+          // 3. LVGL TICK LOOP
+          const LVGL_TICK_RATE_MS = 5;
+          if (Module._wasm_tick_inc) {
+            setInterval(Module._wasm_tick_inc, LVGL_TICK_RATE_MS);
+            console.log(`Started LVGL tick interval (${LVGL_TICK_RATE_MS}ms).`);
+          } else {
+            console.error("Error: _wasm_tick_inc not exported. LVGL timers will fail.");
+          }
+
+          // 4. DISPLAY REFRESH LOOP
+          function animate() {
+            // --- THIS IS THE FIX ---
+            // Check for the function you actually exported: _run_loop
+            if (Module._run_loop) {
+              // Call _run_loop, which calls C++'s loop()
+              Module._run_loop();
+            }
+            // -----------------------
+            window.requestAnimationFrame(animate);
+          }
+          window.requestAnimationFrame(animate);
+          console.log('Started requestAnimationFrame loop for display updates.');
+
+        } else {
+          console.error("Error: _run_app not found on Module. Check RUSTFLAGS export.");
+          console.log("Available Module keys:", Object.keys(Module));
+        }
+      } catch (e) {
+        console.error("Error starting Rust/C++ app:", e);
+      }
+    };
+
+    // Optional: Handle fatal errors
+    Module.onAbort = function (reason) {
+      console.error('WASM Aborted:', reason);
+      document.body.innerHTML = `<pre style="color: red; white-space: pre-wrap;">WASM Aborted: ${reason}</pre>`;
+    };
+  </script>
+
+  <script src="/wasm_backend/pkg/wasm_backend.js"></script>
+</body>
+
+</html>

@@ -1,26 +1,19 @@
 #include <lvgl.h>
-#include <time.h>
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
-#include <unordered_map>
-#include <vector>
-#include "wifi.h"
-
-hal::Display* amoled;
+#include "Temp_gui.hpp"
+#include "wifi_cred.h"
+static TempGUI* gui;
+static hal::Display* amoled;
 volatile sig_atomic_t exit_flag = 0;  // Global flag
 #if !defined(ARDUINO_ARCH_ESP32)
 void handle_sigterm(int signum) {
   exit_flag = 1;  // Set the flag to signal exit
 }
 #endif
-static lv_obj_t* tileview;
-static lv_obj_t* t1;
-static lv_obj_t* t2;
-static lv_obj_t* t1_label;
-static lv_obj_t* t2_label;
-static bool t2_dark = false;  // start tile #2 in light mode
 
+<<<<<<< HEAD
 // Function: Tile #2 Color change
 static void apply_tile_colors(lv_obj_t* tile, lv_obj_t* label, bool dark) {
   std::cout << "lets goooooooo changing colour" << std::endl;
@@ -88,6 +81,9 @@ static void create_ui() {
 
 // Function: Connects to WIFI
 static void connect_wifi() {
+=======
+void connect_wifi() {
+>>>>>>> f0a8c8361958a75547535775673c8d9f5626f6d9
   // Serial.printf("Connecting to WiFi SSID: %s\n", WIFI_SSID);
   // WiFi.mode(WIFI_STA);
   // WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -113,22 +109,20 @@ void setup() {
 #endif
   amoled = new hal::Display();
   hal::init(amoled);
-
-  create_ui();
+  gui = new TempGUI();
+  gui->create_ui();
+  lv_obj_invalidate(lv_scr_act());
   connect_wifi();
 }
 
 void loop() {
-  std::unordered_map<int, int> test;
-  if (exit_flag)
-    return;
+  int sleep_dur = lv_timer_handler();
+  hal::sleep(sleep_dur);
 
   if (amoled->handle_events() == 1) {
     exit_flag = true;
     return;
   }
-  int sleep_dur = lv_timer_handler();
-  hal::sleep(sleep_dur);
 }
 int main() {
   setup();
@@ -136,6 +130,17 @@ int main() {
   while (!exit_flag) {
     loop();
   }
-  std::cout<<"\nExiting gracefully..."<<std::endl;
+  std::cout << "\nExiting gracefully..." << std::endl;
   return 0;
 }
+#if defined(WASM_BUILD)
+extern "C" {
+void app_setup() {
+  setup();
+}
+
+void app_loop() {
+  loop();
+}
+}
+#endif  // WASM_BUILD
