@@ -1,7 +1,7 @@
 #pragma once
-#include "IDisplay.hpp"
 #include "Display.hpp"
-
+#include "IDisplay.hpp"
+#include <ArduinoJson.h>
 namespace hal {
 inline void init(Display* amoled);
 inline void sleep(int sleep_delay);
@@ -12,9 +12,7 @@ inline void sleep(int sleep_delay);
 #error LILYGO only builds to ARDUINO_ARCH_ESP32 target
 #endif
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <HTTPClient.h>
-#include <TFT_eSPI.h>
 #include <WiFi.h>
 #include <lvgl.h>
 #include "./LilyGo/LilyGo_AMOLED.h"

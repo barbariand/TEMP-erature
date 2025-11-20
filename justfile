@@ -24,7 +24,8 @@ default:
   just --list
 # Clean the pio dependencies, libraries, and build files
 clean: clean_pio clean_libdeps
-
+test_native:
+  pio test -e native
 # Generate compile_commands.json
 compile_commands:
   pio run -t compiledb

@@ -1,0 +1,10 @@
+{
+    "name": "hal",
+    "version": "1.0.0",
+    "build": {
+        "libLDFMode": "deep+"
+    },
+    "dependencies": {
+        "lvgl": "*"
+    }
+}
