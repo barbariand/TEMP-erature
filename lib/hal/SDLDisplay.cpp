@@ -1,7 +1,6 @@
 
 #ifdef SDL_BUILD
-#include "drivers/sdl/lv_sdl_keyboard.h"
-#include "drivers/sdl/lv_sdl_window.h"
+#include <lvgl.h>
 #include <SDL2/SDL_version.h>
 #include <iostream>
 #include "SDLDisplay.hpp"
