@@ -1,7 +1,7 @@
 #include "Temp_gui.hpp"
-#include "network.h"
-#include "wifi_cred.h"
 #include <iostream>
+#include "network/network.hpp"
+#include "wifi_cred.h"
 
 using namespace LVGL_Wrapper;
 
@@ -27,9 +27,7 @@ void TempGUI::create_ui() {
   auto screen = Screen::getInstance();
   m_tileview = Tileview::create(*screen);
 
-  m_tileview
-
-      ->set_size(screen->get_width(), screen->get_height())
+  m_tileview->set_size(screen->get_width(), screen->get_height())
       .set_scrollbar_mode(ScrollbarMode::Off);
 
   m_t1 = m_tileview->add_tile(0, 0, Direction::Horizontal);

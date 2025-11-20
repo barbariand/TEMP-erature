@@ -2,7 +2,7 @@
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
-#include "Temp_gui.hpp"
+#include "temp_gui/Temp_gui.hpp"
 #include "network/network.hpp"
 // statics
 static TempGUI* gui;
