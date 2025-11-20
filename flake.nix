@@ -26,6 +26,7 @@
             gdb
             cmake
             platformio
+            platformio-core.udev
             clang-tools
             http-server
             watchexec
