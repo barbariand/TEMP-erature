@@ -1,4 +1,6 @@
 #include "Temp_gui.hpp"
+#include "network.h"
+#include "wifi_cred.h"
 #include <iostream>
 
 using namespace LVGL_Wrapper;
@@ -17,6 +19,7 @@ void TempGUI::on_tile2_clicked_member() {
   m_t2_dark = !m_t2_dark;
   if (m_t2 && m_t2_label) {
     apply_tile_colors(*m_t2, *m_t2_label, m_t2_dark);
+    connect_wifi();
   }
 }
 
@@ -42,7 +45,7 @@ void TempGUI::create_ui() {
   m_t2 = m_tileview->add_tile(1, 0, Direction::Horizontal);
   if (m_t2) {
     m_t2_label = Label::create(*m_t2);
-    m_t2_label->set_text("Welcome to the workshop")
+    m_t2_label->set_text("Connect to wifi")
         .set_style_text_font(&lv_font_montserrat_28)
         .center();
 

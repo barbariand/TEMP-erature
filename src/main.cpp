@@ -9,30 +9,30 @@
 static TempGUI* gui;
 static hal::Display* amoled;
 volatile sig_atomic_t exit_flag = 0;
-#if !defined(ARDUINO_ARCH_ESP32)
-#endif
 
 // Must have function: Setup is run once on startup
 void setup() {
-
+Serial.begin(115200);
 #if !defined(ARDUINO_ARCH_ESP32)
   signal(SIGTERM, handle_sigterm);
   signal(SIGINT, handle_sigterm);
 #endif
+  std::cout << "start" << std::endl;
   amoled = new hal::Display();
   hal::init(amoled);
+
   gui = new TempGUI();
   gui->create_ui();
   lv_obj_invalidate(lv_scr_act());
-  connect_wifi();
 }
 
 void loop() {
-  wifi_reconnect_backoff();
+
 
   int sleep_delay = lv_timer_handler();
   delay(sleep_delay);
 }
+
 int main() {
   setup();
 
