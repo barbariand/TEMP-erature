@@ -116,7 +116,7 @@ void TempGUI::create_ui() {
     std::vector<std::string> ordered_days;
     ordered_days.reserve(7);
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; i++) { 
         ordered_days.push_back(dayNames[(today + i) % 7]);
     }
 
