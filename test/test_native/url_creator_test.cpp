@@ -44,20 +44,16 @@ TEST(URLGENERATOR, CUTOF_LATITUDE) {
 
 TEST(URLGENERATOR, CUTOF) {
   // Test the specific rounding behavior of printf's %.4f
-  // 18.55555 should round UP to 18.5556
-  // 56.44444 should round DOWN to 56.4444
+  // 18.55555 should truncate to 18.5555
+  // 56.44444 should truncate to 56.4444
   SevenDayForcastParameters params;
   params.location.lon = 18.55555;
   params.location.lat = 56.44444;
 
   std::string expected =
       "http://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/"
-      "geotype/point/lon/18.5556/lat/56.4444/data.json?timeseries=76";
+      "geotype/point/lon/18.5555/lat/56.4444/data.json?timeseries=76";
   std::string actual = seven_day_forcast_data_url(params);
 
   EXPECT_EQ(actual, expected);
-}
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

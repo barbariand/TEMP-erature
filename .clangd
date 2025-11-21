@@ -3,3 +3,9 @@ CompileFlags:
   - -f*
   - -m*
   CompilationDatabase: .
+If:
+  PathMatch: test/.*
+CompileFlags:
+  Add:
+  - -I./.pio/libdeps/native/googletest/googletest/include/
+  - -I./.pio/libdeps/native/googletest/googlemock/include/

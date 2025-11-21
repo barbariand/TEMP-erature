@@ -24,8 +24,6 @@ default:
   just --list
 # Clean the pio dependencies, libraries, and build files
 clean: clean_pio clean_libdeps
-test_native:
-  pio test -e native
 # Generate compile_commands.json
 compile_commands:
   pio run -t compiledb
@@ -45,7 +43,9 @@ run-native:
   @just write Executing native build
   ./.pio/build/native/program
   @just write Execution finished.
-
+# run native tests
+test_native:
+  pio test -e native
 # Build and run the native environment
 native: build-native run-native
 
@@ -55,6 +55,9 @@ build-esp32:
   pio run -e esp32
   @just write ESP32 build complete. Run 'just upload' to upload to ESP32.
 
+# run esp32 test
+test_esp32:
+  pio test -e esp32
 # Upload to ESP32 (T-Display-AMOLED)
 [linux]
 upload:

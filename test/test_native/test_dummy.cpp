@@ -1,7 +1,6 @@
-#include "dummy_test.h"
 #include <gtest/gtest.h>
+#include "dummy_test.h"
 TEST(MathUtilsTest, HandlesPositiveNumbers) {
-  // EXPECT_EQ continues running the test even if it fails
   EXPECT_EQ(add(2, 2), 4);
   EXPECT_EQ(add(10, 5), 15);
 }
@@ -12,12 +11,6 @@ TEST(MathUtilsTest, HandlesNegativeNumbers) {
 }
 
 TEST(ParityTest, DetectsEvens) {
-  // ASSERT_TRUE stops the current test immediately if it fails
   ASSERT_TRUE(isEven(4));
   ASSERT_FALSE(isEven(5));
-}
-
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

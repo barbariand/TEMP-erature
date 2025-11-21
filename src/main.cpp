@@ -26,7 +26,8 @@ void loop() {
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
 }
-
+//exclude main from testin
+#ifndef PIO_UNIT_TESTING
 int main() {
   setup();
 
@@ -36,6 +37,7 @@ int main() {
   std::cout << "\nExiting gracefully..." << std::endl;
   return 0;
 }
+#endif
 #if defined(WASM_BUILD)
 extern "C" {
 void app_setup() {
