@@ -1,0 +1,5 @@
+#include "data/ForcastData.hpp"
+#include "data/ForcastSevenDays.hpp"
+#include "data/Geometry.hpp"
+#include "data/SymbolCode.hpp"
+#include "data/TimeSeriesData.hpp"
