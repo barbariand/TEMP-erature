@@ -2,6 +2,7 @@
 #include "../assets/font.hpp"
 #include "GUI.hpp"
 #include "api/data/TimeSeriesItem.hpp"
+#include "font/lv_font.h"
 #include "types/StyleSelector.hpp"
 using namespace LVGL_Wrapper;
 class ForcastUIItem : public Component {
@@ -25,8 +26,9 @@ class ForcastUIItem : public Component {
     icon = Label::create(*this);
     icon->set_style_text_font(&weather_font_40, StyleSelector{});
     date = Label::create(*this);
-
+    date->set_style_text_font(&lv_font_montserrat_38);
     temperature = Label::create(*this);
+    temperature->set_style_text_font(&lv_font_montserrat_38);
   }
   explicit ForcastUIItem(BaseWidget* parent) : Component(parent) {}
   void update_data(const TimeSeriesItem& item);
