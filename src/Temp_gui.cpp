@@ -28,6 +28,7 @@ int get_today_index()
 {
     time_t now = time(nullptr);
     struct tm* t = localtime(&now);
+    std::cout << "tm_wday = %d\n", t->tm_wday,"\n";
     
     // tm_wday: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     // Men du verkar använda måndag först i din UI, så vi konverterar
