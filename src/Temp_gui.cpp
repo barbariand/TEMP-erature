@@ -31,7 +31,6 @@ int get_today_index()
     std::cout << "tm_wday = %d\n", t->tm_wday,"\n";
     
     // tm_wday: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    // Men du verkar använda måndag först i din UI, så vi konverterar
     int wday = t->tm_wday;    // 0–6
 
     // Gör måndag = 0, tisdag = 1, ... söndag = 6
@@ -102,13 +101,13 @@ void TempGUI::create_ui() {
   if (m_t4) {
     m_t4_label = Label::create(*m_t4);
     m_t4_label->set_text("Karlskrona")
-        .set_style_text_font(&lv_font_montserrat_28)
-        .align(LVGL_Wrapper::Align::TopLeft,10,10);
+        .set_style_text_font(&lv_font_montserrat_38)
+        .align(LVGL_Wrapper::Align::TopLeft,10,30);
 
 
     const char* dayNames[7] = {
-      "Monday", "Tuesday", "Wednesday",
-      "Thursday", "Friday", "Saturday", "Sunday"
+      "Mo", "Tu", "We",
+      "Th", "Fr", "Sa", "Su"
     };
 
     int today = get_today_index();
@@ -124,16 +123,16 @@ void TempGUI::create_ui() {
     for (int i = 0; i < 7; i++) {
         m_labels[i] = Label::create(*m_t4);
         m_labels[i]->set_text(ordered_days[i].c_str())
-            .set_style_text_font(&lv_font_montserrat_16);
+            .set_style_text_font(&lv_font_montserrat_28);
 
         if (i == 0) {
             // First label goes under the title
             m_labels[i]->align_to(*m_t4_label,
-                LVGL_Wrapper::Align::OutBottomLeft, 0,20);
+                LVGL_Wrapper::Align::OutBottomLeft, 0,30);
         } else {
             // The rest chain downward
             m_labels[i]->align_to(*m_labels[i - 1],
-                LVGL_Wrapper::Align::OutMidRight, 10, 0);
+                LVGL_Wrapper::Align::OutMidRight, 50, 0);
         }
     }
     apply_tile_colors(*m_t4, *m_t4_label, false);
