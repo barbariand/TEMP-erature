@@ -31,6 +31,15 @@ void loop() {
 
   int sleep_delay = lv_timer_handler();
   delay(sleep_delay);
+
+  #if defined(ARDUINO_ARCH_ESP32)
+    // Läs från Serial Monitor och uppdatera grafen
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n'); // Läs en rad
+        int value = input.toInt();                   // Konvertera till int
+        gui->update_chart(value);                    // Uppdatera grafen
+    }
+  #endif
 }
 
 int main() {

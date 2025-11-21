@@ -14,6 +14,7 @@ class TempGUI {
   TempGUI& operator=(const TempGUI&) = delete;
 
   void create_ui();
+  void update_chart(int new_value);
 
  private:
   void apply_tile_colors(Widget& tile, Label& label, bool dark);
@@ -22,9 +23,14 @@ class TempGUI {
   std::shared_ptr<Tileview> m_tileview;
   std::shared_ptr<Label> m_t1_label;
   std::shared_ptr<Label> m_t2_label;
+  std::shared_ptr<Label> m_t4_label;
+  std::vector<std::shared_ptr<Label>> m_labels{7};
   std::shared_ptr<Tile> m_t1;
+  std::shared_ptr<Tile> m_t4;
   std::shared_ptr<Tile> m_t2;
-
+  std::shared_ptr<Tile> m_t3;
+  lv_obj_t* m_chart = nullptr;
+  lv_chart_series_t* m_series = nullptr;
   bool m_t2_dark = false;
 };
 
