@@ -39,6 +39,7 @@ void ForcastUI::init() {
   city_label = Label::create(*this);
   city_label->set_text("Karlskrona")
       .set_style_text_font(&lv_font_montserrat_28)
-      .set_width(LV_PCT(100))
-      .set_style_text_align(LV_TEXT_ALIGN_CENTER, 0);  // Center text
+      .set_width(LV_PCT(100));
+
+  city_label->set_style_text_align(LV_TEXT_ALIGN_CENTER);
 }
