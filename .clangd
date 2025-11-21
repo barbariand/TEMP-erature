@@ -3,9 +3,22 @@ CompileFlags:
   - -f*
   - -m*
   CompilationDatabase: .
+
+---
+
 If:
-  PathMatch: test/.*
+  PathMatch: test/test_esp32/.*
 CompileFlags:
   Add:
-  - -I./.pio/libdeps/native/googletest/googletest/include/
-  - -I./.pio/libdeps/native/googletest/googlemock/include/
+  - -I.pio/libdeps/esp32/googletest/googletest/include/
+  - -I.pio/libdeps/esp32/googletest/googlemock/include/
+
+---
+If:
+  PathMatch: test/test_native/.*
+CompileFlags:
+  Add:
+    - -D_GNU_SOURCE
+    - -std=c++17
+    - -I.pio/libdeps/native/googletest/googletest/include/
+    - -I.pio/libdeps/native/googletest/googlemock/include/
