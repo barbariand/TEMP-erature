@@ -3,6 +3,7 @@
 #include <memory>
 #include "core/Component.hpp"
 
+#include "ForcastUi.hpp"
 using namespace LVGL_Wrapper;
 
 class TempGUI {
@@ -22,8 +23,10 @@ class TempGUI {
   std::shared_ptr<Tileview> m_tileview;
   std::shared_ptr<Label> m_t1_label;
   std::shared_ptr<Label> m_t2_label;
-  std::shared_ptr<Tile> m_t1;
-  std::shared_ptr<Tile> m_t2;
+  std::shared_ptr<Tile> m_tile_group;
+  std::shared_ptr<Tile> m_tile_example;
+  std::shared_ptr<Tile> m_tile_forcast;
+  std::shared_ptr<ForcastUI> forcast_ui;
 
   bool m_t2_dark = false;
 };

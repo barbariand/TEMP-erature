@@ -2,7 +2,7 @@
 #include <ArduinoJson.hpp>
 #include <vector>
 #include "Geometry.hpp"
-#include "TimeSeriesData.hpp"
+#include "TimeSeriesItem.hpp"
 struct ForecastSevenDay {
   std::string createdTime;
   std::string referenceTime;
@@ -10,4 +10,5 @@ struct ForecastSevenDay {
   std::vector<TimeSeriesItem> timeSeries;
 
   void fromJson(ArduinoJson::JsonDocument& doc);
+  std::vector<TimeSeriesItem> get_all_mid_day_reports();
 };

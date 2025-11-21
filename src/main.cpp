@@ -22,7 +22,7 @@ void setup() {
 }
 
 void loop() {
-  wifi_reconnect_backoff();
+  //wifi_reconnect_backoff();
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
 }

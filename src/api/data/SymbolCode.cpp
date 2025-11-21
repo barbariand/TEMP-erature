@@ -66,7 +66,7 @@ std::string WeatherSymbol::toString() const {
       return "Okänt";
   }
 }
-const char* WeatherSymbol::get_weather_icon_str() {
+ const char* WeatherSymbol::get_weather_icon_str() const {
   // Dessa koder är specifika för weather_fontfonten.
   switch ((int)this->value) {
     case 1:

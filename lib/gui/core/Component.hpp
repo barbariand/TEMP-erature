@@ -8,13 +8,23 @@ class Component : public Widget {
   explicit Component(BaseWidget* parent) : Widget(lv_obj_create, parent) {}
 
  public:
-  virtual ~Component() {}
+  virtual ~Component() = default;
+  virtual void init() {}
 
-  static std::shared_ptr<Component> create(BaseWidget& parent) {
-    auto new_component = std::shared_ptr<Component>(new Component(&parent));
+  template <typename T>
+  static std::shared_ptr<T> create(BaseWidget& parent) {
+    auto new_component = std::shared_ptr<T>(new T(&parent));
     parent.register_child(new_component);
+
+    new_component->init();
+
     return new_component;
   }
-};
 
+ protected:
+  template <typename WidgetType>
+  std::shared_ptr<WidgetType> make_child() {
+    return WidgetType::create(*this);
+  }
+};
 }  // namespace LVGL_Wrapper

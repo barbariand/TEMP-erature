@@ -1,8 +1,14 @@
 #include "Temp_gui.hpp"
 #include <iostream>
+#include <memory>
+#include "GUI.hpp"
+#include <ArduinoJson.h>
+#include "api/api.hpp"
 #include "network/network.hpp"
-#include "wifi_cred.h"
-
+#include "types/Enums.hpp"
+const char* JSON =
+#include "JSON.txt"
+    ;
 using namespace LVGL_Wrapper;
 
 void TempGUI::apply_tile_colors(Widget& tile, Label& label, bool dark) {
@@ -17,8 +23,8 @@ void TempGUI::apply_tile_colors(Widget& tile, Label& label, bool dark) {
 
 void TempGUI::on_tile2_clicked_member() {
   m_t2_dark = !m_t2_dark;
-  if (m_t2 && m_t2_label) {
-    apply_tile_colors(*m_t2, *m_t2_label, m_t2_dark);
+  if (m_tile_example && m_t2_label) {
+    apply_tile_colors(*m_tile_example, *m_t2_label, m_t2_dark);
     connect_wifi();
   }
 }
@@ -30,25 +36,34 @@ void TempGUI::create_ui() {
   m_tileview->set_size(screen->get_width(), screen->get_height())
       .set_scrollbar_mode(ScrollbarMode::Off);
 
-  m_t1 = m_tileview->add_tile(0, 0, Direction::Horizontal);
-  if (m_t1) {
-    m_t1_label = Label::create(*m_t1);
+  m_tile_group = m_tileview->add_tile(0, 0, Direction::Horizontal);
+  if (m_tile_group) {
+    m_t1_label = Label::create(*m_tile_group);
     m_t1_label->set_text("Group 15, ver. 0.1")
         .set_style_text_font(&lv_font_montserrat_28)
         .center();
 
-    apply_tile_colors(*m_t1, *m_t1_label, false);
+    apply_tile_colors(*m_tile_group, *m_t1_label, false);
   }
 
-  m_t2 = m_tileview->add_tile(1, 0, Direction::Horizontal);
-  if (m_t2) {
-    m_t2_label = Label::create(*m_t2);
+  m_tile_example = m_tileview->add_tile(1, 0, Direction::Horizontal);
+  if (m_tile_example) {
+    m_t2_label = Label::create(*m_tile_example);
     m_t2_label->set_text("Connect to wifi")
         .set_style_text_font(&lv_font_montserrat_28)
         .center();
 
-    apply_tile_colors(*m_t2, *m_t2_label, false);
-    m_t2->add_flag(Flag::Clickable);
-    m_t2->on_clicked([this]() { this->on_tile2_clicked_member(); });
+    apply_tile_colors(*m_tile_example, *m_t2_label, false);
+    m_tile_example->add_flag(Flag::Clickable);
+    m_tile_example->on_clicked([this]() { this->on_tile2_clicked_member(); });
   }
+  m_tile_forcast = m_tileview->add_tile(2, 0, Direction::Horizontal);
+  forcast_ui = Component::create<ForcastUI>(*m_tile_forcast);
+
+  ArduinoJson::JsonDocument doc;
+
+  ArduinoJson::deserializeJson(doc, JSON);
+  ForecastSevenDay data;
+  data.fromJson(doc);
+  forcast_ui->update(data);
 }

@@ -38,7 +38,8 @@ struct WeatherSymbol {
 
   Type value;
 
+ public:
   WeatherSymbol(int code = 0);
   std::string toString() const;
-  const char* get_weather_icon_str();
+  const char* get_weather_icon_str() const;
 };
