@@ -36,4 +36,9 @@ void ForcastUI::init() {
   lv_obj_set_flex_flow(m_obj, LV_FLEX_FLOW_COLUMN);
 
   set_scrollbar_mode(ScrollbarMode::Auto);
+  city_label = Label::create(*this);
+  city_label->set_text("Karlskrona")
+      .set_style_text_font(&lv_font_montserrat_28)
+      .set_width(LV_PCT(100))
+      .set_style_text_align(LV_TEXT_ALIGN_CENTER, 0);  // Center text
 }

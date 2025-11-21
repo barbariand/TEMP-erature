@@ -1,9 +1,9 @@
 #pragma once
 #include <GUI.hpp>
 #include <memory>
+#include "ForcastUi.hpp"
 #include "core/Component.hpp"
 
-#include "ForcastUi.hpp"
 using namespace LVGL_Wrapper;
 
 class TempGUI {
@@ -15,22 +15,29 @@ class TempGUI {
   TempGUI& operator=(const TempGUI&) = delete;
 
   void create_ui();
+  void update_chart(int new_value);
 
  private:
   void apply_tile_colors(Widget& tile, Label& label, bool dark);
   void on_tile2_clicked_member();
+std::shared_ptr<Tileview> tileview;
 
-  std::shared_ptr<Tileview> m_tileview;
-  std::shared_ptr<Label> m_t1_label;
-  std::shared_ptr<Label> m_t2_label;
-  std::shared_ptr<Tile> m_tile_group;
-  std::shared_ptr<Tile> m_tile_example;
-  std::shared_ptr<Tile> m_tile_forcast;
+  // Tile 1: Group Info
+  std::shared_ptr<Tile> group_tile;
+  std::shared_ptr<Label> group_label;
+
+  // Tile 2: Forecast (Container for ForcastUI)
+  std::shared_ptr<Tile> forcast_tile;
   std::shared_ptr<ForcastUI> forcast_ui;
 
-  bool m_t2_dark = false;
-};
+  // Tile 3: Chart
+  std::shared_ptr<Tile> chart_tile;
+  std::shared_ptr<Chart> chart;
+  std::shared_ptr<types::ChartSeries> series;
 
-class StartScreen : public Component {
-  std::shared_ptr<Label> group_name;
+  // Tile 4: Wifi
+  std::shared_ptr<Tile> wifi_tile;
+  std::shared_ptr<Label> wifi_label;
+
+  bool wifi_dark = false;
 };

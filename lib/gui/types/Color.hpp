@@ -19,6 +19,13 @@ struct Color {
       : r(r), g(g), b(b), a(a) {}
 
  public:
+  Color(lv_color_t c) {
+
+    r = c.red;
+    g = c.green;
+    b = c.blue;
+    a = 255;
+  }
   static constexpr Color from_rgb(uint8_t r, uint8_t g, uint8_t b) {
     return Color(r, g, b, 255);
   }
@@ -36,7 +43,7 @@ struct Color {
                  (hex32 >> 24) & 0xFF);
   }
 
-  static Color from_lv_color(lv_color_t c, uint8_t opa) {
+  static Color from_lv_color(lv_color_t c, uint8_t opa = 255) {
     lv_color32_t c32 = lv_color_to_32(c, opa);
     return Color(c32.red, c32.green, c32.blue, opa);
   }

@@ -2,6 +2,7 @@
 
 #include "../../types/Color.hpp"
 #include "../../types/StyleSelector.hpp"
+#include "misc/lv_text.h"
 
 namespace LVGL_Wrapper {
 
@@ -21,6 +22,15 @@ class TextProperties {
     lv_obj_t* obj = static_cast<Derived*>(this)->raw();
     if (obj)
       lv_obj_set_style_text_font(obj, font, selector);
+    return *static_cast<Derived*>(this);
+  }
+
+  Derived& set_style_text_align(const lv_text_align_t* align,
+                                StyleSelector selector = {}) {
+    lv_obj_t* obj = static_cast<Derived*>(this)->raw();
+    if (obj)
+      lv_obj_set_style_text_align(obj, *align, selector);
+
     return *static_cast<Derived*>(this);
   }
 };

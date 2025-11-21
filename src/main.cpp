@@ -2,8 +2,8 @@
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
-#include "temp_gui/Temp_gui.hpp"
 #include "network/network.hpp"
+#include "temp_gui/Temp_gui.hpp"
 // statics
 static TempGUI* gui;
 static hal::Display* amoled;
@@ -25,6 +25,7 @@ void loop() {
   //wifi_reconnect_backoff();
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
+
 }
 //exclude main from testin
 #ifndef PIO_UNIT_TESTING
