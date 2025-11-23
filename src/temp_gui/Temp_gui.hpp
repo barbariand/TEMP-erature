@@ -2,6 +2,7 @@
 #include <GUI.hpp>
 #include <memory>
 #include "ForcastUi.hpp"
+#include "SettingsUi.hpp"
 #include "core/Component.hpp"
 
 using namespace LVGL_Wrapper;
@@ -34,10 +35,15 @@ std::shared_ptr<Tileview> tileview;
   std::shared_ptr<Tile> chart_tile;
   std::shared_ptr<Chart> chart;
   std::shared_ptr<types::ChartSeries> series;
+  std::shared_ptr<Label> chart_label;
 
   // Tile 4: Wifi
   std::shared_ptr<Tile> wifi_tile;
   std::shared_ptr<Label> wifi_label;
+
+  // Tile 5: Setting screen
+  std::shared_ptr<Tile> setting_tile;
+  std::shared_ptr<SettingsUI> setting_ui;
 
   bool wifi_dark = false;
 };
