@@ -6,6 +6,7 @@
 #include "api/api.hpp"
 #include "network/network.hpp"
 #include "types/Enums.hpp"
+#include "settings_storage.hpp"
 
 // Include network headers if they aren't in network.hpp
 
@@ -74,10 +75,22 @@ void TempGUI::create_ui() {
     for (int i = 0; i < 10; i++) {
       chart->set_next_value(*series, rand() % 100);
     }
+    // Label to indicate which parameter is shown
+    chart_label = Label::create(*chart_tile);
+    chart_label->set_text("Parameter: Temperature")
+        .set_style_text_font(&lv_font_montserrat_22)
+        .set_width(LV_PCT(100))
+        .set_y(8);
   }
 
-  // --- Tile 3: Wifi Connect ---
-  wifi_tile = tileview->add_tile(3, 0, Direction::Horizontal);
+  // --- Tile 3: Setting ---
+  setting_tile = tileview->add_tile(3, 0, Direction::Horizontal);
+  if (setting_tile) {
+    setting_ui = Component::create<SettingsUI>(*setting_tile);
+  }
+
+  // --- Tile 4: Wifi Connect ---
+  wifi_tile = tileview->add_tile(4, 0, Direction::Horizontal);
   if (wifi_tile) {
     wifi_label = Label::create(*wifi_tile);
     wifi_label->set_text("Connect to wifi")
@@ -88,6 +101,37 @@ void TempGUI::create_ui() {
     wifi_tile->add_flag(Flag::Clickable);
     wifi_tile->on_clicked([this]() { this->on_tile2_clicked_member(); });
   }
+
+  // Ensure the first tile (0,0) is the active/start tile so Settings is fourth (index 3)
+  lv_tileview_set_tile_by_index(tileview->raw(), 0, 0, LV_ANIM_OFF);
+
+  // Wire settings save callback to apply immediately to Forecast and Chart
+  if (setting_ui) {
+    setting_ui->on_save_callback = [this](const Settings& s) {
+      if (forcast_ui && !s.city.empty()) {
+        forcast_ui->set_city(s.city.c_str());
+      }
+      if (chart_label) {
+        std::string lbl = std::string("Parameter: ") + s.parameter;
+        chart_label->set_text(lbl.c_str());
+      }
+    };
+  }
+
+  // Load settings and apply to forecast UI (city label) and chart label
+  {
+    Settings s = SettingsStorage::load();
+    if (!s.city.empty() && forcast_ui) {
+      forcast_ui->set_city(s.city.c_str());
+    }
+    if (chart_label) {
+      std::string lbl = std::string("Parameter: ") + s.parameter;
+      chart_label->set_text(lbl.c_str());
+    }
+  }
+
+
+
 
   // --- Load Data ---
   ArduinoJson::JsonDocument doc;

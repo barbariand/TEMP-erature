@@ -12,4 +12,5 @@ class ForcastUI : public Component {
   void init() override;
   explicit ForcastUI(BaseWidget* parent) : Component(parent) {}
   void update(ForecastSevenDay data);
+  void set_city(const char* city);
 };

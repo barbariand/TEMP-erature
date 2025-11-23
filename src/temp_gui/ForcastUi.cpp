@@ -43,3 +43,8 @@ void ForcastUI::init() {
 
   city_label->set_style_text_align(LV_TEXT_ALIGN_CENTER);
 }
+
+void ForcastUI::set_city(const char* city) {
+  if (!city_label) return;
+  city_label->set_text(city);
+}
