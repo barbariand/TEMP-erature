@@ -16,3 +16,5 @@ target/
 .DS_Store
 src/wifi_cred.h
 src/network/wifi_cred.h
+src/network/wifi_cred.hpp
+src/network/wifi_cred.hpp
