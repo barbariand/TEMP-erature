@@ -2,7 +2,7 @@
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include <FS.h>
-
+using namespace ArduinoJson;
 using namespace std;
 
 static const char* SETTINGS_PATH = "/settings.json";
@@ -28,7 +28,7 @@ Settings load() {
   buf[size] = '\0';
   f.close();
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   auto err = deserializeJson(doc, buf.get());
   if (err) return s;
 
@@ -43,7 +43,7 @@ bool save(const Settings& s) {
     return false;
   }
 
-  DynamicJsonDocument doc(1024);
+  JsonDocument doc;
   doc["city"] = s.city.c_str();
   doc["parameter"] = s.parameter.c_str();
 

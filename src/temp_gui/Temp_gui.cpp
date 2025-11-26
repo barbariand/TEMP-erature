@@ -5,8 +5,8 @@
 #include "GUI.hpp"
 #include "api/api.hpp"
 #include "network/network.hpp"
-#include "types/Enums.hpp"
 #include "settings_storage.hpp"
+#include "types/Enums.hpp"
 
 // Include network headers if they aren't in network.hpp
 
@@ -129,9 +129,6 @@ void TempGUI::create_ui() {
       chart_label->set_text(lbl.c_str());
     }
   }
-
-
-
 
   // --- Load Data ---
   ArduinoJson::JsonDocument doc;

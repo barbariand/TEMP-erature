@@ -3,6 +3,7 @@
 #include <string>
 #include "../core/Widget.hpp"
 #include "./mixins/TextProperties.hpp"
+#include "misc/lv_text_private.h"
 
 namespace LVGL_Wrapper {
 
