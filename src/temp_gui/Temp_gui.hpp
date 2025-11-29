@@ -2,6 +2,8 @@
 #include <GUI.hpp>
 #include <memory>
 #include "ForcastUi.hpp"
+#include "api/api.hpp"
+#include <vector>
 #include "SettingsUi.hpp"
 #include "core/Component.hpp"
 
@@ -36,6 +38,19 @@ std::shared_ptr<Tileview> tileview;
   std::shared_ptr<Chart> chart;
   std::shared_ptr<types::ChartSeries> series;
   std::shared_ptr<Label> chart_label;
+  std::shared_ptr<Slider> chart_slider;
+  std::shared_ptr<Label> chart_slider_label;
+  // Labels under the chart for X-axis (dates / numeric labels)
+  std::vector<std::shared_ptr<Label>> chart_x_labels;
+  // Statistic labels (min / avg / max)
+  std::shared_ptr<Label> chart_stat_min;
+  std::shared_ptr<Label> chart_stat_avg;
+  std::shared_ptr<Label> chart_stat_max;
+
+  // Store the last loaded forecast data so we can repopulate the chart
+  ForecastSevenDay forecast_data;
+  // External Y buffer used when binding values to LVGL chart via ext_y_array
+  std::vector<int32_t> chart_y_buffer;
 
   // Tile 4: Wifi
   std::shared_ptr<Tile> wifi_tile;
@@ -46,4 +61,6 @@ std::shared_ptr<Tileview> tileview;
   std::shared_ptr<SettingsUI> setting_ui;
 
   bool wifi_dark = false;
+  // Populate chart using the named parameter (e.g. "Temperature", "Humidity", "Wind Speed")
+  void populate_chart_for_parameter(const std::string& parameter);
 };
