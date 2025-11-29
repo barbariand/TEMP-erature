@@ -42,6 +42,11 @@ std::shared_ptr<Tileview> tileview;
   std::shared_ptr<Label> chart_slider_label;
   // Labels under the chart for X-axis (dates / numeric labels)
   std::vector<std::shared_ptr<Label>> chart_x_labels;
+  // Tick labels below the chart (start / mid / end)
+  std::vector<std::shared_ptr<Label>> chart_tick_labels;
+  // Chart title and y-axis label
+  std::shared_ptr<Label> chart_title;
+  std::shared_ptr<Label> chart_ylabel;
   // Statistic labels (min / avg / max)
   std::shared_ptr<Label> chart_stat_min;
   std::shared_ptr<Label> chart_stat_avg;

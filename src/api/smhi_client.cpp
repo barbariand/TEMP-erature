@@ -46,6 +46,12 @@ bool fetch_seven_day_forecast(double lon, double lat, ArduinoJson::DynamicJsonDo
 }
 
 bool fetch_latest_months(double lon, double lat, ArduinoJson::DynamicJsonDocument& outDoc, unsigned long timeout_ms) {
-  // Best-effort: try same endpoint for now (project may add station-based obs later)
+  // Try the observations "latest-months" period using the observations point endpoint.
+  // Example: https://opendata.smhi.se/api/category/observations/version/2/geotype/point/lon/{lon}/lat/{lat}/data.json?period=latest-months
+  char buf[256];
+  snprintf(buf, sizeof(buf), "https://opendata.smhi.se/api/category/observations/version/2/geotype/point/lon/%.6f/lat/%.6f/data.json?period=latest-months", lon, lat);
+  String url(buf);
+  if (fetch_from_url(url, outDoc, timeout_ms)) return true;
+  // Fallback: try the point forecast if observations not available
   return fetch_seven_day_forecast(lon, lat, outDoc, timeout_ms);
 }
