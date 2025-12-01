@@ -1,7 +1,7 @@
 #include "settings_storage.hpp"
-#include <SPIFFS.h>
 #include <ArduinoJson.h>
 #include <FS.h>
+#include <SPIFFS.h>
 using namespace ArduinoJson;
 using namespace std;
 
@@ -11,16 +11,14 @@ namespace SettingsStorage {
 
 Settings load() {
   Settings s;
-  if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(true))
     return s;
-  }
-
-  if (!SPIFFS.exists(SETTINGS_PATH)) {
+  if (!SPIFFS.exists(SETTINGS_PATH))
     return s;
-  }
 
   File f = SPIFFS.open(SETTINGS_PATH, FILE_READ);
-  if (!f) return s;
+  if (!f)
+    return s;
 
   size_t size = f.size();
   std::unique_ptr<char[]> buf(new char[size + 1]);
@@ -30,25 +28,28 @@ Settings load() {
 
   JsonDocument doc;
   auto err = deserializeJson(doc, buf.get());
-  if (err) return s;
+  if (err)
+    return s;
 
-  if (doc.containsKey("city")) s.city = doc["city"].as<const char*>();
-  if (doc.containsKey("parameter")) s.parameter = doc["parameter"].as<const char*>();
+  if (doc.containsKey("city"))
+    s.city = doc["city"].as<const char*>();
+  if (doc.containsKey("parameter"))
+    s.parameter = doc["parameter"].as<const char*>();
 
   return s;
 }
 
 bool save(const Settings& s) {
-  if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(true))
     return false;
-  }
 
   JsonDocument doc;
   doc["city"] = s.city.c_str();
   doc["parameter"] = s.parameter.c_str();
 
   File f = SPIFFS.open(SETTINGS_PATH, FILE_WRITE);
-  if (!f) return false;
+  if (!f)
+    return false;
 
   if (serializeJson(doc, f) == 0) {
     f.close();
@@ -58,4 +59,4 @@ bool save(const Settings& s) {
   return true;
 }
 
-} // namespace SettingsStorage
+}  // namespace SettingsStorage

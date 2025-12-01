@@ -1,16 +1,24 @@
-
 #pragma once
 #include <GUI.hpp>
 #include "ForcastUiItem.hpp"
 #include "api/api.hpp"
-using namespace LVGL_Wrapper;
-class ForcastUI : public Component {
-  std::shared_ptr<Label> city_label;
+
+// VIKTIGT: Ingen 'using namespace' här i header-filen (Best practice).
+// Vi skriver LVGL_Wrapper:: framför typerna istället.
+
+class ForcastUI : public LVGL_Wrapper::Component {
+  std::shared_ptr<LVGL_Wrapper::Label> city_label;
   std::vector<std::shared_ptr<ForcastUIItem>> items;
 
  public:
+  // Konstruktorn
+  explicit ForcastUI(LVGL_Wrapper::BaseWidget* parent) 
+      : LVGL_Wrapper::Component(parent) {}
+
   void init() override;
-  explicit ForcastUI(BaseWidget* parent) : Component(parent) {}
-  void update(ForecastSevenDay data);
+
+  // ÄNDRING HÄR: const ... & för prestanda
+  void update(const ForecastSevenDay& data);
+  
   void set_city(const char* city);
 };
