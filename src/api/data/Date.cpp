@@ -12,7 +12,11 @@ SimpleDate SimpleDate::getLocalTimeFromIso(const std::string& isoString) {
 
   return SimpleDate(*tm_local);
 }
-
+SimpleDate SimpleDate::getLocalTimeFromUTCStamp(const int time) {
+  std::time_t tmp = time;
+  std::tm* tm_local = localtime(&tmp);
+  return SimpleDate(*tm_local);
+}
 std::string SimpleDate::toString(const std::string& formatStr) const {
   std::tm t = {};
   t.tm_year = year - 1900;
@@ -26,4 +30,17 @@ std::string SimpleDate::toString(const std::string& formatStr) const {
   std::strftime(buffer, sizeof(buffer), formatStr.c_str(), &t);
 
   return std::string(buffer);
+}
+
+time_t parseIsoTime(const std::string& isoString) {
+  std::tm tm = {};
+  std::istringstream ss(isoString);
+
+  ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
+
+  if (ss.fail()) {
+    return 0;
+  }
+
+  return mktime(&tm);
 }

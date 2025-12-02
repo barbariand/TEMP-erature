@@ -1,98 +1,98 @@
-#include "MeterologyParameters.hpp"
+#include "MeterologyCode.hpp"
 
-MeterologyParameter::MeterologyParameter(int code) {
+MeterologyCode::MeterologyCode(int code) {
 
   if (code >= 1 && code <= 40) {
     value = static_cast<Type>(code);
   } else {
-    value = Type::Okänd_Parameter;
+    value = Type::Unknown_Parameter;
   }
 }
 
-std::string MeterologyParameter::toString() const {
+std::string MeterologyCode::toString() const {
   switch (value) {
-    case Type::Lufttemperatur_Momentan:
+    case Type::AirTemperature_Momentary:
       return "Lufttemperatur (momentanvärde, 1 gång/tim) [°C]";
-    case Type::Lufttemperatur_MedelDygn:
+    case Type::AirTemperature_DailyMean:
       return "Lufttemperatur (medelvärde 1 dygn) [°C]";
-    case Type::Vindriktning:
+    case Type::WindDirection:
       return "Vindriktning (medelvärde 10 min) [grader]";
-    case Type::Vindhastighet:
+    case Type::WindSpeed:
       return "Vindhastighet (medelvärde 10 min) [m/s]";
-    case Type::Nederbördsmängd_SummaDygn:
+    case Type::PrecipitationAmount_DailySum:
       return "Nederbördsmängd (summa 1 dygn) [mm]";
-    case Type::Relativ_Luftfuktighet:
+    case Type::Relative_Humidity:
       return "Relativ Luftfuktighet (momentanvärde) [%]";
-    case Type::Nederbördsmängd_SummaTimme:
+    case Type::PrecipitationAmount_HourlySum:
       return "Nederbördsmängd (summa 1 timme) [mm]";
-    case Type::Snödjup:
+    case Type::SnowDepth:
       return "Snödjup (momentanvärde) [meter]";
-    case Type::Lufttryck_Reducerat:
+    case Type::AirPressure_Reduced:
       return "Lufttryck reducerat havsytans nivå (momentanvärde) [hPa]";
-    case Type::Solskenstid:
+    case Type::SunshineDuration:
       return "Solskenstid (summa 1 timme) [sekund]";
-    case Type::Global_Irradians:
+    case Type::Global_Irradiance:
       return "Global Irradians (medelvärde 1 timma) [W/m²]";
-    case Type::Sikt:
+    case Type::Visibility:
       return "Sikt (momentanvärde) [meter]";
-    case Type::Rådande_Väder:
+    case Type::Current_Weather:
       return "Rådande väder (momentanvärde) [kod]";
-    case Type::Nederbördsmängd_Summa15min:
+    case Type::PrecipitationAmount_15minSum:
       return "Nederbördsmängd (summa 15 min) [mm]";
-    case Type::Nederbördsintensitet_Max15min:
+    case Type::PrecipitationIntensity_Max15min:
       return "Nederbördsintensitet (max under 15 min) [mm/s]";
-    case Type::Total_Molnmängd:
+    case Type::Total_CloudCover:
       return "Total molnmängd (momentanvärde) [%]";
-    case Type::Nederbörd_TvåGångerDygn:
+    case Type::Precipitation_TwiceDaily:
       return "Nederbörd (2 gånger/dygn) [kod]";
-    case Type::Nederbörd_EnGångDygn:
+    case Type::Precipitation_OnceDaily:
       return "Nederbörd (1 gång/dygn) [kod]";
-    case Type::Lufttemperatur_MinDygn:
+    case Type::AirTemperature_DailyMin:
       return "Lufttemperatur (min, 1 gång per dygn) [°C]";
-    case Type::Lufttemperatur_MaxDygn:
+    case Type::AirTemperature_DailyMax:
       return "Lufttemperatur (max, 1 gång per dygn) [°C]";
-    case Type::Byvind:
+    case Type::WindGust:
       return "Byvind (max, 1 gång/tim) [m/s]";
-    case Type::Lufttemperatur_MedelMånad:
+    case Type::AirTemperature_MonthlyMean:
       return "Lufttemperatur (medel, 1 gång per månad) [°C]";
-    case Type::Nederbördsmängd_SummaMånad:
+    case Type::PrecipitationAmount_MonthlySum:
       return "Nederbördsmängd (summa, 1 gång per månad) [mm]";
-    case Type::Långvågs_Irradians:
+    case Type::Longwave_Irradiance:
       return "Långvågs-Irradians (medelvärde 1 timma) [W/m²]";
-    case Type::Max_Av_MedelVindhastighet:
+    case Type::Max_Of_MeanWindSpeed:
       return "Max av MedelVindhastighet (maximum av medelvärde 10 min) [m/s]";
-    case Type::Lufttemperatur_MinTvåGångerDygn:
+    case Type::AirTemperature_MinTwiceDaily:
       return "Lufttemperatur (min, 2 gånger per dygn) [°C]";
-    case Type::Lufttemperatur_MaxTvåGångerDygn:
+    case Type::AirTemperature_MaxTwiceDaily:
       return "Lufttemperatur (max, 2 gånger per dygn) [°C]";
-    case Type::Molnbas_LägstaLager:
+    case Type::CloudBase_LowestLayer:
       return "Molnbas (lägsta molnlager) [meter]";
-    case Type::Molnmängd_LägstaLager:
+    case Type::CloudAmount_LowestLayer:
       return "Molnmängd (lägsta molnlager) [kod]";
-    case Type::Molnbas_AndraLager:
+    case Type::CloudBase_SecondLayer:
       return "Molnbas (andra molnlager) [meter]";
-    case Type::Molnmängd_AndraLager:
+    case Type::CloudAmount_SecondLayer:
       return "Molnmängd (andra molnlager) [kod]";
-    case Type::Molnbas_TredjeLager:
+    case Type::CloudBase_ThirdLayer:
       return "Molnbas (tredje molnlager) [meter]";
-    case Type::Molnmängd_TredjeLager:
+    case Type::CloudAmount_ThirdLayer:
       return "Molnmängd (tredje molnlager) [kod]";
-    case Type::Molnbas_FjärdeLager:
+    case Type::CloudBase_FourthLayer:
       return "Molnbas (fjärde molnlager) [meter]";
-    case Type::Molnmängd_FjärdeLager:
+    case Type::CloudAmount_FourthLayer:
       return "Molnmängd (fjärde molnlager) [kod]";
-    case Type::Molnbas_LägstaMolnbas:
+    case Type::CloudBase_LowestCloudBase:
       return "Molnbas (lägsta molnbas, momentanvärde) [meter]";
-    case Type::Molnbas_LägstaMolnbasMin:
+    case Type::CloudBase_LowestCloudBaseMin:
       return "Molnbas (lägsta molnbas, min under 15 min) [meter]";
-    case Type::Nederbördsintensitet_MaxMedel15min:
+    case Type::PrecipitationIntensity_MaxMean15min:
       return "Nederbördsintensitet (max av medel under 15 min) [mm/s]";
-    case Type::Daggpunktstemperatur:
+    case Type::DewPointTemperature:
       return "Daggpunktstemperatur (momentanvärde) [°C]";
-    case Type::Markens_Tillstånd:
+    case Type::Ground_Condition:
       return "Markens tillstånd (momentanvärde) [kod]";
 
-    case Type::Okänd_Parameter:
+    case Type::Unknown_Parameter:
     default:
       return "Okänd meteorologisk parameter";
   }
