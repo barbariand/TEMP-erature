@@ -1,11 +1,12 @@
 #pragma once
 
 #include <string>
+#include "api/parameters/MeterologyCode.hpp"
 #include <ArduinoJson.h>
 
 struct Settings {
   std::string city;
-  std::string parameter = "Temperature"; // e.g. "Temperature", "Humidity", "Wind Speed"
+  MeterologyCode parameter = MeterologyCode::AirTemperature_DailyMean; // e.g. "Temperature", "Humidity", "Wind Speed"
 };
 
 namespace SettingsStorage {

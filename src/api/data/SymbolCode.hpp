@@ -5,7 +5,7 @@
 
 struct WeatherSymbol {
   // Alla 27 koder enligt SMHI:s SNOW dokumentation
-  enum class Type : int {
+  enum Type : int {
     ClearSky = 1,
     NearlyClearSky = 2,
     VariableCloudiness = 3,

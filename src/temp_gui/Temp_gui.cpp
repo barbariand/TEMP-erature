@@ -1,38 +1,26 @@
 #include "Temp_gui.hpp"
 #include <ArduinoJson.h>
+#include <cmath>
 #include <ctime>
 #include <iostream>
 #include <memory>
 #include "GUI.hpp"
 #include "api/api.hpp"
 #include "api/cities.hpp"
+#include "api/data/DataPoint.hpp"
 #include "api/data/ForcastSevenDays.hpp"
+#include "api/data/ObservationSeries.hpp"
 #include "api/parameters/SevenDayForcastParameters.hpp"
 #include "api/smhi_client.hpp"
+#include "api/url/SMHIUrlGenerator.hpp"
 #include "lvgl.h"
 #include "network/network.hpp"
 #include "settings_storage.hpp"
 #include "types/Enums.hpp"
 
-const char* JSON =
-#include "JSON.txt"
-    ;
-
 using namespace LVGL_Wrapper;
 
-// Global container för X-axelns datumetiketter
 static lv_obj_t* g_xaxis_cont = nullptr;
-
-// Helper: Översätt svenska UI-namn till API-namn
-std::string translate_city(const std::string& input) {
-  if (input == "Göteborg")
-    return "Gothenburg";
-  if (input == "Malmö")
-    return "Malmo";
-  if (input == "Köpenhamn")
-    return "Copenhagen";
-  return input;
-}
 
 void TempGUI::apply_tile_colors(Widget& tile, Label& label, bool dark) {
   Color bg_color = dark ? Color::Black : Color::White;
@@ -57,7 +45,6 @@ void TempGUI::create_ui() {
   tileview->set_size(LV_PCT(100), LV_PCT(100))
       .set_scrollbar_mode(ScrollbarMode::Off);
 
-  // --- PIL-LOGIK (FLOATING) ---
   auto add_nav_arrows = [&](Widget& tile_widget, bool show_left,
                             bool show_right) {
     int arrow_y = (screen_h / 2) - 14;
@@ -68,7 +55,7 @@ void TempGUI::create_ui() {
           .set_style_text_font(&lv_font_montserrat_28)
           .set_style_text_color(Color::from_lv_color(lv_color_hex(0x888888)));
       aL->set_pos(10, arrow_y);
-      // VIKTIGT: Floating gör att de inte påverkar Flex-layouten
+
       lv_obj_add_flag(aL->raw(), LV_OBJ_FLAG_FLOATING);
     }
 
@@ -82,7 +69,6 @@ void TempGUI::create_ui() {
     }
   };
 
-  // --- Tile 0: Start ---
   group_tile = tileview->add_tile(0, 0, Direction::Horizontal);
   if (group_tile) {
     group_label = Label::create(*group_tile);
@@ -94,16 +80,14 @@ void TempGUI::create_ui() {
     add_nav_arrows(*group_tile, false, true);
   }
 
-  // --- Tile 1: Forecast ---
   forcast_tile = tileview->add_tile(1, 0, Direction::Horizontal);
   if (forcast_tile) {
-    lv_obj_set_style_pad_hor(forcast_tile->raw(), 40, 0);  // Marginaler
+    lv_obj_set_style_pad_hor(forcast_tile->raw(), 40, 0);
     forcast_ui = Component::create<ForcastUI>(*forcast_tile);
     forcast_tile->set_style_bg_opa(Opa::Cover).set_style_bg_color(Color::White);
     add_nav_arrows(*forcast_tile, true, true);
   }
 
-  // --- Tile 2: Chart (Historik) ---
   chart_tile = tileview->add_tile(2, 0, Direction::Horizontal);
   if (chart_tile) {
     lv_obj_set_flex_flow(chart_tile->raw(), LV_FLEX_FLOW_COLUMN);
@@ -120,7 +104,6 @@ void TempGUI::create_ui() {
         .set_style_text_align(LV_TEXT_ALIGN_CENTER)
         .set_width(LV_PCT(100));
 
-    // Grafen
     chart = Chart::create(*chart_tile);
     chart->set_width(LV_PCT(100));
     chart->set_height(LV_PCT(40));
@@ -132,7 +115,6 @@ void TempGUI::create_ui() {
         Color::from_lv_color(lv_palette_main(LV_PALETTE_BLUE)),
         LV_CHART_AXIS_PRIMARY_Y);
 
-    // X-Axel datumrad (Mellan graf och stats)
     g_xaxis_cont = lv_obj_create(chart_tile->raw());
     lv_obj_set_size(g_xaxis_cont, LV_PCT(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(g_xaxis_cont, LV_FLEX_FLOW_ROW);
@@ -143,7 +125,6 @@ void TempGUI::create_ui() {
     lv_obj_set_style_pad_all(g_xaxis_cont, 0, 0);
     lv_obj_set_style_pad_hor(g_xaxis_cont, 5, 0);
 
-    // Statistik Panel
     lv_obj_t* stats_cont = lv_obj_create(chart_tile->raw());
     lv_obj_set_size(stats_cont, LV_PCT(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(stats_cont, LV_FLEX_FLOW_ROW);
@@ -158,7 +139,6 @@ void TempGUI::create_ui() {
     chart_stat_avg = Label::create(*chart_tile);
     chart_stat_max = Label::create(*chart_tile);
 
-    // Flytta labels till panelen
     lv_obj_set_parent(chart_stat_min->raw(), stats_cont);
     lv_obj_set_parent(chart_stat_avg->raw(), stats_cont);
     lv_obj_set_parent(chart_stat_max->raw(), stats_cont);
@@ -170,7 +150,6 @@ void TempGUI::create_ui() {
     chart_stat_max->set_text("Max: --").set_style_text_font(
         &lv_font_montserrat_14);
 
-    // Slider
     lv_obj_t* slider_cont = lv_obj_create(chart_tile->raw());
     lv_obj_set_size(slider_cont, LV_PCT(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(slider_cont, LV_FLEX_FLOW_COLUMN);
@@ -198,7 +177,6 @@ void TempGUI::create_ui() {
     add_nav_arrows(*chart_tile, true, true);
   }
 
-  // --- Tile 3: Settings ---
   setting_tile = tileview->add_tile(3, 0, Direction::Horizontal);
   if (setting_tile) {
     lv_obj_set_style_pad_hor(setting_tile->raw(), 40, 0);
@@ -206,7 +184,6 @@ void TempGUI::create_ui() {
     add_nav_arrows(*setting_tile, true, true);
   }
 
-  // --- Tile 4: Wifi ---
   wifi_tile = tileview->add_tile(4, 0, Direction::Horizontal);
   if (wifi_tile) {
     lv_obj_set_style_pad_hor(wifi_tile->raw(), 40, 0);
@@ -222,7 +199,6 @@ void TempGUI::create_ui() {
 
   lv_tileview_set_tile_by_index(tileview->raw(), 0, 0, LV_ANIM_OFF);
 
-  // --- SAVE CALLBACK (Hämta ny data) ---
   if (setting_ui) {
     setting_ui->on_save_callback = [this](const Settings& s) {
       std::cout << "[DEBUG] Settings Saved. City: " << s.city << std::endl;
@@ -231,7 +207,7 @@ void TempGUI::create_ui() {
         forcast_ui->set_city(s.city.c_str());
 
       bool city_found = false;
-      std::string search_city = translate_city(s.city);
+      std::string search_city = s.city;
 
       for (const auto& c : kKnownCities) {
         if (search_city == c.name) {
@@ -261,36 +237,26 @@ void TempGUI::create_ui() {
     };
   }
 
-  // --- STARTUP (Försök hämta data) ---
   Settings s = SettingsStorage::load();
   if (!s.city.empty() && forcast_ui)
     forcast_ui->set_city(s.city.c_str());
 
-  // Ladda cache först (snabbt)
-  ArduinoJson::JsonDocument doc;
-  if (!ArduinoJson::deserializeJson(doc, JSON)) {
-    ForecastSevenDay data;
-    data.fromJson(doc);
-    forecast_data = data;
-    if (forcast_ui)
-      forcast_ui->update(data);
-  }
-
-  // Försök hämta live-data om stad är vald
   if (!s.city.empty()) {
-    std::string search_city = translate_city(s.city);
+    std::string search_city = s.city;
     for (const auto& c : kKnownCities) {
       if (search_city == c.name) {
         ArduinoJson::JsonDocument doc;
         bool fetched = false;
-
-        SevenDayForcastParameters param;
-        param.location.lat = c.lat;
-        param.location.lon = c.lon;
-        ForecastSevenDay out;
-        if (fetch_seven_day_forecast(param, out)) {
+        StationsLatestMonthsParameters param;
+        param.meterology = s.parameter;
+        auto it = std::find(setting_ui->city_list.begin(),
+                            setting_ui->city_list.end(), s.city);
+        param.station =
+            kKnownCities[it - setting_ui->city_list.begin()].station;
+        ObservationSeries out;
+        if (fetch_latest_months(param, out)) {
           fetched = true;
-          forecast_data = out;
+          observation_data = out;
           std::cout << "[DEBUG] API Fetch Success!" << std::endl;
         } else {
           std::cout << "[DEBUG] API FAILED! Check WiFi." << std::endl;
@@ -309,169 +275,134 @@ void TempGUI::update_chart(int new_value) {
     chart->set_next_value(*series, new_value);
 }
 
-void TempGUI::populate_chart_for_parameter(const std::string& parameter) {
-  if (!chart || !series)
+void TempGUI::populate_chart_for_parameter(const MeterologyCode& parameter) {
+
+  MeterologyCodeInfo info = parameter.toInfo();
+
+  if (chart_title)
+    chart_title->set_text(info.name);
+  if (chart_ylabel)
+    chart_ylabel->set_text(info.unit);
+
+  std::vector<DataPoint> all_points = observation_data.getPoints();
+
+  if (all_points.empty()) {
+    if (chart_slider) {
+      chart_slider->set_range(0, 0);
+      chart_slider->set_value(0, false);
+    }
+    if (chart && series) {
+
+      for (int i = 0; i < 7; i++)
+        chart->set_next_value(*series, LV_CHART_POINT_NONE);
+    }
+
+    if (g_xaxis_cont)
+      lv_obj_clean(g_xaxis_cont);
+
+    if (chart_stat_min)
+      chart_stat_min->set_text("Min: --");
+    if (chart_stat_avg)
+      chart_stat_avg->set_text("Avg: --");
+    if (chart_stat_max)
+      chart_stat_max->set_text("Max: --");
     return;
-
-  std::vector<TimeSeriesItem> points = forecast_data.get_all_mid_day_reports();
-  std::vector<int32_t> xvals;
-  std::vector<float> yvals_flt;
-  std::vector<int32_t> yvals_int;
-
-  // Läs data
-  if (points.size() >= 1) {
-    size_t take = std::min<size_t>(7, points.size());
-    size_t start_idx = (points.size() > take) ? (points.size() - take) : 0;
-    for (size_t i = start_idx; i < points.size(); ++i) {
-      const auto& it = points[i];
-      std::tm tm{};
-      tm.tm_year = it.time.year - 1900;
-      tm.tm_mon = it.time.month - 1;
-      tm.tm_mday = it.time.day;
-      tm.tm_hour = it.time.hour;
-      std::time_t t = std::mktime(&tm);
-      int32_t days = static_cast<int32_t>(t / 86400);
-
-      xvals.push_back(days);
-      float v = (parameter == "Temperature") ? it.data.airTemperature
-                : (parameter == "Humidity")
-                    ? static_cast<float>(it.data.relativeHumidity)
-                : (parameter == "Wind Speed") ? it.data.windSpeed
-                                              : it.data.airTemperature;
-      yvals_flt.push_back(v);
-      yvals_int.push_back(static_cast<int32_t>(round(v)));
-    }
-  } else {
-    // Fallback om dygnsdata saknas
-    std::map<int32_t, std::vector<float>> day_map;
-    for (const auto& it : forecast_data.timeSeries) {
-      std::tm tm{};
-      tm.tm_year = it.time.year - 1900;
-      tm.tm_mon = it.time.month - 1;
-      tm.tm_mday = it.time.day;
-      tm.tm_hour = it.time.hour;
-      std::time_t t = std::mktime(&tm);
-      int32_t days = static_cast<int32_t>(t / 86400);
-      float v = (parameter == "Temperature") ? it.data.airTemperature
-                : (parameter == "Humidity")
-                    ? static_cast<float>(it.data.relativeHumidity)
-                : (parameter == "Wind Speed") ? it.data.windSpeed
-                                              : it.data.airTemperature;
-      day_map[days].push_back(v);
-    }
-    for (const auto& kv : day_map) {
-      float sum = 0;
-      for (float v : kv.second)
-        sum += v;
-      float avg = sum / kv.second.size();
-      xvals.push_back(kv.first);
-      yvals_flt.push_back(avg);
-      yvals_int.push_back(static_cast<int32_t>(round(avg)));
-    }
   }
 
-  if (xvals.empty())
-    return;
-
-  // Uppdatera titel
-  if (chart_label) {
-    std::string t = parameter + " Overview";
-    chart_label->set_text(t.c_str());
-  }
-
-  size_t windowSize = std::min<size_t>(7, xvals.size());
-  int max_scroll = std::max<int>(0, (int)xvals.size() - (int)windowSize);
+  const int view_width = 7;
+  int total_points = static_cast<int>(all_points.size());
+  int max_scroll_idx =
+      (total_points > view_width) ? (total_points - view_width) : 0;
 
   if (chart_slider) {
-    chart_slider->set_range(0, max_scroll);
-    if (chart_slider->get_value() > max_scroll) {
-      chart_slider->set_value(max_scroll, LV_ANIM_OFF);
+    int current_val = chart_slider->get_value();
+    int prev_max = chart_slider->get_max_value();
+
+    chart_slider->set_range(0, max_scroll_idx);
+
+    if (current_val == 0 && max_scroll_idx > 0) {
+      current_val = max_scroll_idx;
     }
+
+    if (current_val > max_scroll_idx)
+      current_val = max_scroll_idx;
+    chart_slider->set_value(current_val, false);
   }
 
-  size_t start =
-      (chart_slider) ? static_cast<size_t>(chart_slider->get_value()) : 0;
-  if (start > max_scroll)
-    start = max_scroll;
+  int start_index = (chart_slider) ? chart_slider->get_value() : 0;
+  int end_index = start_index + view_width;
+  if (end_index > total_points)
+    end_index = total_points;
 
-  std::vector<int32_t> view_y_int;
-  std::vector<float> view_y_flt;
-  std::vector<int32_t> view_x_days;
-
-  for (size_t i = 0; i < windowSize; ++i) {
-    view_y_int.push_back(yvals_int[start + i]);
-    view_y_flt.push_back(yvals_flt[start + i]);
-    view_x_days.push_back(xvals[start + i]);
-  }
-
-  chart->set_point_count(static_cast<uint16_t>(windowSize));
-
-  int y_min = -20, y_max = 30;
-  if (parameter == "Humidity") {
-    y_min = 0;
-    y_max = 100;
-  } else if (parameter == "Wind Speed") {
-    y_min = 0;
-    y_max = 30;
-  } else {
-    float min_val = view_y_flt[0];
-    float max_val = view_y_flt[0];
-    for (float v : view_y_flt) {
-      if (v < min_val)
-        min_val = v;
-      if (v > max_val)
-        max_val = v;
-    }
-    y_min = static_cast<int>(min_val - 5);
-    y_max = static_cast<int>(max_val + 5);
-  }
-  chart->set_range(LV_CHART_AXIS_PRIMARY_Y, y_min, y_max);
-
-  chart_y_buffer = view_y_int;
-  chart->set_ext_y_array(*series, chart_y_buffer.data());
-  chart->refresh();
-
-  // UPPDATERA DATUM-ETIKETTER
-  if (g_xaxis_cont) {
+  if (g_xaxis_cont)
     lv_obj_clean(g_xaxis_cont);
-    for (size_t i = 0; i < windowSize; ++i) {
-      lv_obj_t* label_obj = lv_label_create(g_xaxis_cont);
-      lv_obj_set_style_text_font(label_obj, &lv_font_montserrat_12, 0);
 
-      time_t t = static_cast<time_t>(view_x_days[i]) * 86400;
-      struct tm* tm = localtime(&t);
+  float local_min = 10000.0f;
+  float local_max = -10000.0f;
+  double sum = 0;
+  int count = 0;
+  std::vector<float> view_values;
+  std::vector<SimpleDate> view_dates;
 
-      char buf[16];
-      snprintf(buf, sizeof(buf), "%d/%d", tm->tm_mday, tm->tm_mon + 1);
-      lv_label_set_text(label_obj, buf);
+  for (int i = start_index; i < end_index; ++i) {
+    const auto& p = all_points[i];
+    view_values.push_back(p.value);
+    view_dates.push_back(p.date);
+
+    if (p.value < local_min)
+      local_min = p.value;
+    if (p.value > local_max)
+      local_max = p.value;
+    sum += p.value;
+    count++;
+  }
+
+  if (chart && series) {
+
+    int padding = view_width - count;
+    for (int k = 0; k < padding; k++) {
+      chart->set_next_value(*series, LV_CHART_POINT_NONE);
+    }
+
+    for (size_t i = 0; i < view_values.size(); i++) {
+
+      chart->set_next_value(*series,
+                            static_cast<int>(std::round(view_values[i])));
+
+      if (g_xaxis_cont) {
+        lv_obj_t* lbl = lv_label_create(g_xaxis_cont);
+        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_28, 0);
+
+        char date_buf[16];
+
+        snprintf(date_buf, sizeof(date_buf), "%d/%d", view_dates[i].day,
+                 view_dates[i].month);
+        lv_label_set_text(lbl, date_buf);
+      }
+    }
+
+    if (count > 0) {
+      int range_min = static_cast<int>(std::floor(local_min)) - 2;
+      int range_max = static_cast<int>(std::ceil(local_max)) + 2;
+      chart->set_range(LV_CHART_AXIS_PRIMARY_Y, range_min, range_max);
     }
   }
 
-  // Statistik
-  float min_v = view_y_flt[0], max_v = view_y_flt[0], sum_v = 0;
-  for (float v : view_y_flt) {
-    if (v < min_v)
-      min_v = v;
-    if (v > max_v)
-      max_v = v;
-    sum_v += v;
+  if (count > 0) {
+    char buf[64];
+
+    if (chart_stat_min) {
+      snprintf(buf, sizeof(buf), "Min: %.1f %s", local_min, info.unit.c_str());
+      chart_stat_min->set_text(buf);
+    }
+    if (chart_stat_max) {
+      snprintf(buf, sizeof(buf), "Max: %.1f %s", local_max, info.unit.c_str());
+      chart_stat_max->set_text(buf);
+    }
+    if (chart_stat_avg) {
+      snprintf(buf, sizeof(buf), "Avg: %.1f %s", (sum / count),
+               info.unit.c_str());
+      chart_stat_avg->set_text(buf);
+    }
   }
-  float avg_v = sum_v / windowSize;
-
-  char buf[32];
-  const char* unit = (parameter == "Temperature") ? "C"
-                     : (parameter == "Humidity")  ? "%"
-                                                  : "m/s";
-
-  snprintf(buf, sizeof(buf), "Min: %.1f%s", min_v, unit);
-  if (chart_stat_min)
-    chart_stat_min->set_text(buf);
-
-  snprintf(buf, sizeof(buf), "Avg: %.1f%s", avg_v, unit);
-  if (chart_stat_avg)
-    chart_stat_avg->set_text(buf);
-
-  snprintf(buf, sizeof(buf), "Max: %.1f%s", max_v, unit);
-  if (chart_stat_max)
-    chart_stat_max->set_text(buf);
 }

@@ -13,4 +13,5 @@ class ObservationSeries {
 
  public:
   void fromJson(ArduinoJson::JsonDocument doc);
+  std::vector<DataPoint> getPoints();
 };

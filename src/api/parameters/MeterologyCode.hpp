@@ -1,6 +1,9 @@
 #pragma once
-#include <iostream>
-
+#include <string>
+struct MeterologyCodeInfo {
+  std::string name;
+  std::string unit;
+};
 struct MeterologyCode {
   enum class Type : int {
 
@@ -127,11 +130,80 @@ struct MeterologyCode {
     // Okänd_Parameter
     Unknown_Parameter = 0,
   };
+  static constexpr Type AirTemperature_Momentary =
+      Type::AirTemperature_Momentary;
+  static constexpr Type AirTemperature_DailyMean =
+      Type::AirTemperature_DailyMean;
+  static constexpr Type WindDirection = Type::WindDirection;
+  static constexpr Type WindSpeed = Type::WindSpeed;
+  static constexpr Type PrecipitationAmount_DailySum =
+      Type::PrecipitationAmount_DailySum;
+  static constexpr Type Relative_Humidity = Type::Relative_Humidity;
+  static constexpr Type PrecipitationAmount_HourlySum =
+      Type::PrecipitationAmount_HourlySum;
+  static constexpr Type SnowDepth = Type::SnowDepth;
+  static constexpr Type AirPressure_Reduced = Type::AirPressure_Reduced;
+  static constexpr Type SunshineDuration = Type::SunshineDuration;
+  static constexpr Type Global_Irradiance = Type::Global_Irradiance;
+  static constexpr Type Visibility = Type::Visibility;
+  static constexpr Type Current_Weather = Type::Current_Weather;
+  static constexpr Type PrecipitationAmount_15minSum =
+      Type::PrecipitationAmount_15minSum;
+  static constexpr Type PrecipitationIntensity_Max15min =
+      Type::PrecipitationIntensity_Max15min;
+  static constexpr Type Total_CloudCover = Type::Total_CloudCover;
+  static constexpr Type Precipitation_TwiceDaily =
+      Type::Precipitation_TwiceDaily;
+  static constexpr Type Precipitation_OnceDaily = Type::Precipitation_OnceDaily;
+  static constexpr Type AirTemperature_DailyMin = Type::AirTemperature_DailyMin;
+  static constexpr Type AirTemperature_DailyMax = Type::AirTemperature_DailyMax;
+  static constexpr Type WindGust = Type::WindGust;
+  static constexpr Type AirTemperature_MonthlyMean =
+      Type::AirTemperature_MonthlyMean;
+  static constexpr Type PrecipitationAmount_MonthlySum =
+      Type::PrecipitationAmount_MonthlySum;
+  static constexpr Type Longwave_Irradiance = Type::Longwave_Irradiance;
+  static constexpr Type Max_Of_MeanWindSpeed = Type::Max_Of_MeanWindSpeed;
+  static constexpr Type AirTemperature_MinTwiceDaily =
+      Type::AirTemperature_MinTwiceDaily;
+  static constexpr Type AirTemperature_MaxTwiceDaily =
+      Type::AirTemperature_MaxTwiceDaily;
+  static constexpr Type CloudBase_LowestLayer = Type::CloudBase_LowestLayer;
+  static constexpr Type CloudAmount_LowestLayer = Type::CloudAmount_LowestLayer;
+  static constexpr Type CloudBase_SecondLayer = Type::CloudBase_SecondLayer;
+  static constexpr Type CloudAmount_SecondLayer = Type::CloudAmount_SecondLayer;
+  static constexpr Type CloudBase_ThirdLayer = Type::CloudBase_ThirdLayer;
+  static constexpr Type CloudAmount_ThirdLayer = Type::CloudAmount_ThirdLayer;
+  static constexpr Type CloudBase_FourthLayer = Type::CloudBase_FourthLayer;
+  static constexpr Type CloudAmount_FourthLayer = Type::CloudAmount_FourthLayer;
+  static constexpr Type CloudBase_LowestCloudBase =
+      Type::CloudBase_LowestCloudBase;
+  static constexpr Type CloudBase_LowestCloudBaseMin =
+      Type::CloudBase_LowestCloudBaseMin;
+  static constexpr Type PrecipitationIntensity_MaxMean15min =
+      Type::PrecipitationIntensity_MaxMean15min;
+  static constexpr Type DewPointTemperature = Type::DewPointTemperature;
+  static constexpr Type Ground_Condition = Type::Ground_Condition;
+  static constexpr Type Unknown_Parameter = Type::Unknown_Parameter;
 
   Type value;
 
  public:
-  MeterologyCode(int code = 0);
-  operator int() const { return static_cast<int>(*this); }
-  std::string toString() const;
+  bool operator!() { return value != Type::Unknown_Parameter; }
+  MeterologyCode(Type t = Unknown_Parameter) : value(t) {}
+  explicit MeterologyCode(int code);
+
+  bool operator==(const MeterologyCode& other) const {
+    return value == other.value;
+  }
+  bool operator==(Type other) const { return value == other; }
+  bool operator!=(const MeterologyCode& other) const {
+    return value != other.value;
+  }
+  bool operator!=(Type other) const { return value != other; }
+
+  operator Type() const { return value; }
+
+  explicit operator int() const { return static_cast<int>(value); }
+  MeterologyCodeInfo toInfo() const;
 };

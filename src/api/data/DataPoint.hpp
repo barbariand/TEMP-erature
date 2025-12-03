@@ -1,4 +1,3 @@
-
 #pragma once
 #include <ArduinoJson.h>
 #include "api/data/TimeSeriesItem.hpp"

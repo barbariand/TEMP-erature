@@ -5,6 +5,8 @@
 #include "ForcastUi.hpp"
 #include "SettingsUi.hpp"
 #include "api/api.hpp"
+#include "api/data/ObservationSeries.hpp"
+#include "api/parameters/MeterologyCode.hpp"
 #include "core/Component.hpp"
 
 using namespace LVGL_Wrapper;
@@ -54,6 +56,7 @@ class TempGUI {
 
   // Store the last loaded forecast data so we can repopulate the chart
   ForecastSevenDay forecast_data;
+  ObservationSeries observation_data;
   // External Y buffer used when binding values to LVGL chart via ext_y_array
   std::vector<int32_t> chart_y_buffer;
 
@@ -67,5 +70,5 @@ class TempGUI {
 
   bool wifi_dark = false;
   // Populate chart using the named parameter (e.g. "Temperature", "Humidity", "Wind Speed")
-  void populate_chart_for_parameter(const std::string& parameter);
+  void populate_chart_for_parameter(const MeterologyCode& parameter);
 };

@@ -1,7 +1,7 @@
 #include "settings_storage.hpp"
 #include <ArduinoJson.h>
 #include <FS.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 using namespace ArduinoJson;
 using namespace std;
 
@@ -11,12 +11,12 @@ namespace SettingsStorage {
 
 Settings load() {
   Settings s;
-  if (!SPIFFS.begin(true))
+  if (!LittleFS.begin(true))
     return s;
-  if (!SPIFFS.exists(SETTINGS_PATH))
+  if (!LittleFS.exists(SETTINGS_PATH))
     return s;
 
-  File f = SPIFFS.open(SETTINGS_PATH, FILE_READ);
+  File f = LittleFS.open(SETTINGS_PATH, FILE_READ);
   if (!f)
     return s;
 
@@ -40,14 +40,14 @@ Settings load() {
 }
 
 bool save(const Settings& s) {
-  if (!SPIFFS.begin(true))
+  if (!LittleFS.begin(true))
     return false;
 
   JsonDocument doc;
   doc["city"] = s.city.c_str();
   doc["parameter"] = s.parameter.c_str();
 
-  File f = SPIFFS.open(SETTINGS_PATH, FILE_WRITE);
+  File f = LittleFS.open(SETTINGS_PATH, FILE_WRITE);
   if (!f)
     return false;
 

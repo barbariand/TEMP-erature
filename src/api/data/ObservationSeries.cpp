@@ -12,3 +12,7 @@ void ObservationSeries::fromJson(ArduinoJson::JsonDocument doc) {
     points.push_back(point);
   }
 }
+
+std::vector<DataPoint> ObservationSeries::getPoints() {
+  return points;
+}

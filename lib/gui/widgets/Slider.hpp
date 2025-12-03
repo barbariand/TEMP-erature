@@ -15,6 +15,18 @@ class Slider : public Widget, public PartIndicatorProperties<Slider> {
     return new_slider;
   }
 
+  int get_max_value() {
+    int max = INT_MIN;
+    if (m_obj)
+      max = lv_slider_get_max_value(m_obj);
+    return max;
+  }
+  int get_min_value() {
+    int min = INT_MAX;
+    if (m_obj)
+      min = lv_slider_get_min_value(m_obj);
+    return min;
+  }
   Slider& set_range(int32_t min, int32_t max) {
     if (m_obj)
       lv_slider_set_range(m_obj, min, max);
