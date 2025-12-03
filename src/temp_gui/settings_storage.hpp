@@ -11,6 +11,6 @@ struct Settings {
 };
 
 namespace SettingsStorage {
-Settings load();
+Settings load(bool retry = false);
 bool save(const Settings& s);
 }  // namespace SettingsStorage
