@@ -1,34 +1,43 @@
 #pragma once
 #include <GUI.hpp>
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+#include "../settings_storage.hpp"
 #include "api/cities.hpp"
 #include "api/parameters/MeterologyCode.hpp"
-#include "settings_storage.hpp"
+
+struct SettingsData {
+  int city = 0;
+  MeterologyCode parameter = MeterologyCode::AirTemperature_DailyMean;
+};
 
 using namespace LVGL_Wrapper;
 
-class SettingsUI : public Component {
-  Settings settings;
-  std::shared_ptr<Label> title_label;
+class SettingsUi : public Component {
 
-  // City selection
-  std::shared_ptr<Label> city_label;
-  std::shared_ptr<Dropdown> city_dropdown;
+  Settings m_current_settings;
+  SettingsData m_last_applied;
 
-  // Unit selection
-  // Parameter selection (for historical graph)
-  std::shared_ptr<Label> parameter_label;
-  std::shared_ptr<Dropdown> parameter_dropdown;
-  std::vector<MeterologyCode> parameter_list;
+  std::vector<std::string> m_city_names;
+  std::vector<MeterologyCode> m_params;
 
-  // Save button
-  std::shared_ptr<Button> save_button;
-  std::shared_ptr<Button> reset_button;
+  std::shared_ptr<Label> m_title;
+  std::shared_ptr<Label> m_city_label;
+  std::shared_ptr<Dropdown> m_city_dd;
+  std::shared_ptr<Label> m_param_label;
+  std::shared_ptr<Dropdown> m_param_dd;
+
+  std::shared_ptr<Button> m_save_btn;
+  std::shared_ptr<Button> m_load_btn;
+
+  void dispatch_if_changed();
 
  public:
-  std::vector<std::string> city_list;
-  // Callback invoked after successful save so parent UI can apply changes
-  std::function<void(const Settings&)> on_save_callback;
+  std::function<void(const SettingsData&)> on_save;
+
+  explicit SettingsUi(BaseWidget* parent);
   void init() override;
-  void load_values();
-  explicit SettingsUI(BaseWidget* parent) : Component(parent) {}
+  void load_values_to_ui();
 };

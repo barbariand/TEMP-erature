@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include <iostream>
 #include <memory>
 #include "api/parameters/MeterologyCode.hpp"
 
@@ -11,18 +12,18 @@ using namespace std;
 static const char* SETTINGS_PATH = "/settings.json";
 
 namespace SettingsStorage {
-
 Settings load(bool retry) {
   Settings s;
 
   s.city = kKnownCities[0].station;
-
   if (!LittleFS.exists(SETTINGS_PATH)) {
+    std::cout << "File does not exist can not load" << std::endl;
     return s;
   }
 
   File f = LittleFS.open(SETTINGS_PATH, FILE_READ);
   if (!f) {
+    std::cout << "Failed to open file" << std::endl;
     return s;
   }
 
@@ -35,6 +36,8 @@ Settings load(bool retry) {
   JsonDocument doc;
   auto err = deserializeJson(doc, buf.get());
   if (err) {
+    std::cout << "Failed to deserializeJson" << std::endl;
+    LittleFS.remove(SETTINGS_PATH);
     return s;
   }
 
@@ -61,10 +64,14 @@ bool save(const Settings& s) {
   doc["parameter"] = (int)s.parameter.value;
 
   File f = LittleFS.open(SETTINGS_PATH, FILE_WRITE);
-  if (!f)
+  if (!f) {
+    std::cout << "File does not infact exist somehow and cant be created"
+              << std::endl;
     return false;
-
+  }
   if (serializeJson(doc, f) == 0) {
+
+    std::cout << " failed to seialize to JSON" << std::endl;
     f.close();
     return false;
   }

@@ -1,8 +1,8 @@
 #include "ForcastUiItem.hpp"
 
 void ForcastUIItem::update_data(const TimeSeriesItem& item) {
-  // Datumformat: "Mon 30"
-  std::string d = item.time.toString("%a %d"); 
+  lv_obj_clear_flag(m_obj, LV_OBJ_FLAG_SCROLLABLE);
+  std::string d = item.time.toString("%a %d");
   date->set_text(d.c_str());
 
   char temp_buf[16];

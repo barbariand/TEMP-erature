@@ -1,7 +1,7 @@
 #include "smhi_client.hpp"
+#include <Arduino.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
-#include <Arduino.h>
 #include <WiFi.h>
 #include <iostream>
 #include "./url/SMHIUrlGenerator.hpp"

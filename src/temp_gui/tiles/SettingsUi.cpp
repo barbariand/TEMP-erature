@@ -1,177 +1,165 @@
 #include "SettingsUi.hpp"
-#include <ArduinoJson.h>
 #include <iostream>
-#include "api/cities.hpp"
-#include "api/parameters/MeterologyCode.hpp"
-#include "settings_storage.hpp"
 
-void SettingsUI::load_values() {
-  Settings s = SettingsStorage::load();
-  if (s.city.size()) {
-    for (size_t i = 0; i < city_list.size(); ++i) {
-      if (city_list[i] == s.city) {
-        city_dropdown->set_selected(i);
-        break;
-      }
+using namespace LVGL_Wrapper;
+
+SettingsUi::SettingsUi(BaseWidget* parent) : Component(parent) {}
+
+void SettingsUi::load_values_to_ui() {
+  m_current_settings = SettingsStorage::load();
+
+  int selected_cityx = 0;
+  for (size_t i = 0; i < kKnownCities.size(); ++i) {
+    if (kKnownCities[i].station == m_current_settings.city) {
+      selected_cityx = i;
+      break;
     }
-  } else {
-    city_dropdown->set_selected(0);
+  }
+  if (m_city_dd)
+    m_city_dd->set_selected(selected_cityx);
+
+  int selected_param_idx = 0;
+  for (size_t i = 0; i < m_params.size(); ++i) {
+    if (m_params[i].value == m_current_settings.parameter.value) {
+      selected_param_idx = i;
+      break;
+    }
+  }
+  if (m_param_dd)
+    m_param_dd->set_selected(selected_param_idx);
+}
+
+void SettingsUi::dispatch_if_changed() {
+
+  SettingsData new_target;
+
+  uint16_t c_idx = m_city_dd->get_selected();
+  if (c_idx < kKnownCities.size()) {
+    new_target.city = kKnownCities[c_idx].station;
   }
 
-  for (size_t i = 0; i < parameter_list.size(); ++i) {
-    if (parameter_list[i] == s.parameter) {
-      parameter_dropdown->set_selected(i);
-      break;
+  uint16_t p_idx = m_param_dd->get_selected();
+  if (p_idx < m_params.size()) {
+    new_target.parameter = m_params[p_idx];
+  }
+
+  bool changed = (new_target.city != m_last_applied.city) ||
+                 (new_target.parameter.value != m_last_applied.parameter.value);
+
+  if (changed) {
+    std::cout << "[SettingsUi] Change detected. Fetching new data..."
+              << std::endl;
+
+    m_last_applied = new_target;
+
+    if (on_save) {
+      on_save(new_target);
     }
   }
 }
 
-void SettingsUI::init() {
+void SettingsUi::init() {
   set_size(LV_PCT(100), LV_PCT(100));
-  lv_obj_set_style_pad_all(m_obj, 20, 0);
   lv_obj_set_flex_flow(m_obj, LV_FLEX_FLOW_COLUMN);
-  lv_obj_set_flex_align(m_obj, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
-                        LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_all(m_obj, 20, 0);
   lv_obj_set_style_pad_gap(m_obj, 15, 0);
-  set_scrollbar_mode(ScrollbarMode::Auto);
 
-  title_label = Label::create(*this);
-  title_label->set_text("Settings")
+  m_title = Label::create(*this);
+  m_title->set_text("Settings")
       .set_style_text_font(&lv_font_montserrat_28)
-      .set_width(LV_PCT(100));
-  title_label->set_style_text_align(LV_TEXT_ALIGN_CENTER);
-
-  city_label = Label::create(*this);
-  city_label->set_text("Select City:")
-      .set_style_text_font(&lv_font_montserrat_18)
-      .set_width(LV_PCT(100));
-
-  std::string city_opts;
-  for (auto i : kKnownCities) {
-    city_opts += i.name;
-    city_opts += "\n";
-  }
-  city_opts.pop_back();
-
-  city_dropdown = Dropdown::create(*this);
-  city_dropdown->set_options(city_opts.c_str()).set_width(LV_PCT(100));
-
-  parameter_label = Label::create(*this);
-  parameter_label->set_text("Graph Parameter:")
-      .set_style_text_font(&lv_font_montserrat_18)
-      .set_width(LV_PCT(100));
-
-  parameter_list = {MeterologyCode::AirTemperature_DailyMax,
-                    MeterologyCode::Relative_Humidity,
-                    MeterologyCode::WindSpeed,
-                    MeterologyCode::AirPressure_Reduced};
-  std::string param_opts;
-  for (auto i : parameter_list) {
-    param_opts += i.toInfo().name;
-    param_opts += "\n";
-  }
-  param_opts.pop_back();
-
-  parameter_dropdown = Dropdown::create(*this);
-  parameter_dropdown->set_options(param_opts.c_str()).set_width(LV_PCT(100));
-
-  lv_obj_t* spacer = lv_obj_create(m_obj);
-  lv_obj_set_size(spacer, 10, 20);
-  lv_obj_set_style_bg_opa(spacer, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_width(spacer, 0, 0);
-
-  save_button = Button::create(*this);
-  save_button->set_width(LV_PCT(100));
-  save_button->set_height(50);
-  save_button->set_style_bg_color(lv_color_hex(0x2196F3));
-
-  parameter_dropdown->set_options(param_opts.c_str()).set_width(LV_PCT(60));
-
-  // Button row container (so Save Default and Reset are side-by-side)
-  auto button_row = Component::create<Component>(*this);
-  button_row->set_width(LV_PCT(100));
-  // Use LVGL flex row on the raw object to place children horizontally
-  lv_obj_set_flex_flow(button_row->raw(), LV_FLEX_FLOW_ROW);
-  lv_obj_set_style_pad_row(button_row->raw(), 8, 0);
-
-  // Save Default button
-  save_button = Button::create(*button_row);
-  save_button->set_width(LV_PCT(46));
-  auto save_label = Label::create(*save_button);
-  save_label->set_text("Save").center();
-  save_label->set_text("SAVE SETTINGS")
-      .set_style_text_font(&lv_font_montserrat_20)
       .center();
 
-  save_label->set_text("Save Default").center();
+  m_city_label = Label::create(*this);
+  m_city_label->set_text("Select City:");
 
-  reset_button = Button::create(*button_row);
-  reset_button->set_width(LV_PCT(46));
-  auto reset_label = Label::create(*reset_button);
-  reset_label->set_text("Reset").center();
+  m_city_names.clear();
+  std::string city_opts_str;
+  for (const auto& city : kKnownCities) {
+    m_city_names.push_back(city.name);
+    city_opts_str += std::string(city.name) + "\n";
+  }
+  if (!city_opts_str.empty())
+    city_opts_str.pop_back();
 
-  // Load current values from storage and apply to dropdowns
-  load_values();
+  m_city_dd = Dropdown::create(*this);
+  m_city_dd->set_options(city_opts_str.c_str()).set_width(LV_PCT(100));
 
-  auto apply_changes = [this]() {
-    Settings s;
-    uint16_t sel = city_dropdown->get_selected();
-    if (sel < city_list.size())
-      s.city = city_list[sel];
-    else
-      s.city = city_list.empty() ? "" : city_list[0];
+  m_city_dd->on_value_changed([this]() { dispatch_if_changed(); });
 
-    uint16_t psel = parameter_dropdown->get_selected();
-    if (psel < parameter_list.size())
-      s.parameter = parameter_list[psel];
-    else
-      s.parameter = parameter_list.empty()
-                        ? MeterologyCode(MeterologyCode::Unknown_Parameter)
-                        : parameter_list[0];
+  m_param_label = Label::create(*this);
+  m_param_label->set_text("Graph Parameter:");
 
-    // Inform parent UI immediately (do NOT save here)
-    if (on_save_callback)
-      on_save_callback(s);
-  };
+  m_params = {MeterologyCode::AirTemperature_Momentary,
+              MeterologyCode::Relative_Humidity, MeterologyCode::WindSpeed,
+              MeterologyCode::AirPressure_Reduced};
 
-  // Attach handlers: dropdown changes apply immediately but do not save to storage
-  city_dropdown->on_value_changed([this, apply_changes]() { apply_changes(); });
+  std::string param_opts_str;
+  for (const auto& p : m_params) {
+    param_opts_str += p.toInfo().name + "\n";
+  }
+  if (!param_opts_str.empty())
+    param_opts_str.pop_back();
 
-  parameter_dropdown->on_value_changed(
-      [this, apply_changes]() { apply_changes(); });
+  m_param_dd = Dropdown::create(*this);
+  m_param_dd->set_options(param_opts_str.c_str()).set_width(LV_PCT(100));
 
-  // Save Default button: persist current selections as startup defaults
-  save_button->on_clicked([this]() {
-    Settings s;
-    uint16_t sel = city_dropdown->get_selected();
-    if (sel < city_list.size())
-      s.city = city_list[sel];
-    else
-      s.city = city_list.empty() ? "" : city_list[0];
+  m_param_dd->on_value_changed([this]() { dispatch_if_changed(); });
 
-    uint16_t psel = parameter_dropdown->get_selected();
-    if (psel < parameter_list.size())
-      s.parameter = parameter_list[psel];
-    else
-      s.parameter = parameter_list.empty()
-                        ? MeterologyCode(MeterologyCode::Unknown_Parameter)
-                        : parameter_list[0];
+  auto btn_cont = Component::create<Component>(*this);
+  btn_cont->set_width(LV_PCT(100));
+  btn_cont->set_height(LV_SIZE_CONTENT);
+  btn_cont->set_style_bg_opa(Opa::Opa0);
+  btn_cont->set_style_pad_all(0);
 
-    if (bool ok = SettingsStorage::save(s)) {
+  lv_obj_set_flex_flow(btn_cont->raw(), LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(btn_cont->raw(), LV_FLEX_ALIGN_SPACE_BETWEEN,
+                        LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_gap(btn_cont->raw(), 10, 0);
 
-      if (!ok) {
-        std::cout << "Failed to save settings" << std::endl;
-        std::cout << "Failed to save default settings" << std::endl;
-      }
+  m_save_btn = Button::create(*btn_cont);
+  m_save_btn->set_width(LV_PCT(48))
+      .set_height(50)
+      .set_style_bg_color(Color::from_rgb(33, 150, 243));
 
-      if (on_save_callback)
-        on_save_callback(s);
+  auto save_lbl = Label::create(*m_save_btn);
+  save_lbl->set_text("Save").center();
+
+  m_load_btn = Button::create(*btn_cont);
+  m_load_btn->set_width(LV_PCT(48))
+      .set_height(50)
+      .set_style_bg_color(Color::from_rgb(33, 150, 243));
+
+  auto load_lbl = Label::create(*m_load_btn);
+  load_lbl->set_text("Load").center();
+
+  load_values_to_ui();
+
+  uint16_t c_idx = m_city_dd->get_selected();
+  if (c_idx < kKnownCities.size())
+    m_last_applied.city = kKnownCities[c_idx].station;
+
+  uint16_t p_idx = m_param_dd->get_selected();
+  if (p_idx < m_params.size())
+    m_last_applied.parameter = m_params[p_idx];
+
+  m_save_btn->on_clicked([this]() {
+    uint16_t c_idx = m_city_dd->get_selected();
+    if (c_idx < kKnownCities.size()) {
+      m_current_settings.city = kKnownCities[c_idx].station;
     }
-    reset_button->on_clicked([this]() {
-      load_values();
-      Settings s = SettingsStorage::load();
-      if (on_save_callback)
-        on_save_callback(s);
-    });
+
+    uint16_t p_idx = m_param_dd->get_selected();
+    if (p_idx < m_params.size()) {
+      m_current_settings.parameter = m_params[p_idx];
+    }
+
+    SettingsStorage::save(m_current_settings);
+    std::cout << "[SettingsUi] Defaults saved to disk (no fetch)." << std::endl;
   });
-};
+
+  m_load_btn->on_clicked([this]() {
+    load_values_to_ui();
+
+    dispatch_if_changed();
+  });
+}

@@ -10,7 +10,7 @@ void MainUi::init() {
   set_style_bg_opa(Opa::Cover);
 
   m_label = Label::create(*this);
-  m_label->set_text("Group 15\nVersion 1.0")
+  m_label->set_text("Group 15\nVersion 0.10")
       .set_style_text_font(&lv_font_montserrat_28)
       .set_style_text_align(LV_TEXT_ALIGN_CENTER)
       .center();
