@@ -6,9 +6,8 @@
 #include "api/parameters/MeterologyCode.hpp"
 
 struct Settings {
-  std::string city = kKnownCities[0].name;
-  MeterologyCode parameter = MeterologyCode::
-      AirTemperature_DailyMean;  // e.g. "Temperature", "Humidity", "Wind Speed"
+  int city = kKnownCities[0].station;
+  MeterologyCode parameter = MeterologyCode::AirTemperature_DailyMean;
 };
 
 namespace SettingsStorage {
