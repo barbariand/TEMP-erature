@@ -1,3 +1,5 @@
+
+#pragma once
 #include <ArduinoJson.hpp>
 #include <vector>
 #include "DataPoint.hpp"

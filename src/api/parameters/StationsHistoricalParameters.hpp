@@ -1,5 +1,6 @@
 
+#pragma once
 #include "MeterologyCode.hpp"
-struct StationsHistorical {
+struct StationsHistoricalParameters {
   MeterologyCode meterology;
 };

@@ -1,10 +1,10 @@
 #pragma once
 #include <GUI.hpp>
 #include <memory>
-#include "ForcastUi.hpp"
-#include "api/api.hpp"
 #include <vector>
+#include "ForcastUi.hpp"
 #include "SettingsUi.hpp"
+#include "api/api.hpp"
 #include "core/Component.hpp"
 
 using namespace LVGL_Wrapper;
@@ -23,7 +23,7 @@ class TempGUI {
  private:
   void apply_tile_colors(Widget& tile, Label& label, bool dark);
   void on_tile2_clicked_member();
-std::shared_ptr<Tileview> tileview;
+  std::shared_ptr<Tileview> tileview;
 
   // Tile 1: Group Info
   std::shared_ptr<Tile> group_tile;

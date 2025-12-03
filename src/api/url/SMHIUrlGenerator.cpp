@@ -1,4 +1,5 @@
 #include "SMHIUrlGenerator.hpp"
+#include "api/smhi_client.hpp"
 
 #define FORCAST_BASE_URL "http://opendata-download-metfcst.smhi.se"
 std::string seven_day_forcast_data_url(SevenDayForcastParameters params) {
@@ -13,7 +14,7 @@ std::string seven_day_forcast_data_url(SevenDayForcastParameters params) {
 }
 
 #define OBSERVATION_BASE_URL "http://opendata-download-metfcst.smhi.se"
-std::string stations_historical(StationsHistorical params) {
+std::string stations_historical(StationsHistoricalParameters params) {
   if (!params.meterology) {
     return "";
   }
@@ -23,7 +24,7 @@ std::string stations_historical(StationsHistorical params) {
                 (int)params.meterology);
   return std::string(buffer);
 }
-std::string latest_months_data(StationsHistoricalLatestMonths params) {
+std::string latest_months_data(StationsLatestMonthsParameters params) {
   if (!params.meterology) {
     return "";
   }

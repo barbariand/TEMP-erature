@@ -1,7 +1,9 @@
+#pragma once
 #include <string>
-#include "../parameters/SevenDayForcastParameters.hpp"
-#include "../parameters/StationsHistorical.hpp"
-#include "../parameters/StationsLatestMonths.hpp"
+#include "api/parameters/SevenDayForcastParameters.hpp"
+#include "api/parameters/StationsHistoricalParameters.hpp"
+#include "api/parameters/StationsLatestMonthsParameters.hpp"
+#include "api/smhi_client.hpp"
 std::string seven_day_forcast_data_url(SevenDayForcastParameters params);
-std::string stations_historical(StationsHistorical params);
-std::string latest_months_data(StationsHistoricalLatestMonths params);
+std::string stations_historical(StationsHistoricalParameters params);
+std::string latest_months_data(StationsLatestMonthsParameters params);
