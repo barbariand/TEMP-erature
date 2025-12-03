@@ -8,7 +8,6 @@ struct CityInfo {
   int station;
 };
 
-// Small static list of known cities (name, lon, lat)
 static const std::vector<CityInfo> kKnownCities = {
     {"Karlskrona", 15.5869, 56.1612, 65090},
     {"Stockholm", 18.0686, 59.3293, 97400},

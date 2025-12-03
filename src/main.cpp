@@ -12,7 +12,6 @@ volatile sig_atomic_t exit_flag = 0;
 
 // Must have function: Setup is run once on startup
 void setup() {
-  LittleFS.begin(true);
   std::cout << "start" << std::endl;
   amoled = new hal::Display();
   // hal::init runs Serial.begin(115200);
@@ -32,6 +31,10 @@ void loop() {
 //exclude main from testin
 #ifndef PIO_UNIT_TESTING
 int main() {
+
+  if (!LittleFS.begin(true)) {
+    return 1;
+  };
   setup();
 
   while (!exit_flag) {

@@ -7,11 +7,11 @@
 #include "api/parameters/MeterologyCode.hpp"
 
 class ObservationSeries {
-  std::vector<DataPoint> points;
   MeterologyCode code;
   SimpleDate updated;
 
  public:
+  std::vector<DataPoint> points;
   void fromJson(ArduinoJson::JsonDocument doc);
   std::vector<DataPoint> getPoints();
 };
