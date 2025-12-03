@@ -2,73 +2,46 @@
 #include <GUI.hpp>
 #include <memory>
 #include <vector>
-#include "tiles/ForcastUi.hpp"
-#include "tiles/SettingsUi.hpp"
 #include "api/api.hpp"
+#include "api/data/ForcastSevenDays.hpp"
 #include "api/data/ObservationSeries.hpp"
 #include "api/parameters/MeterologyCode.hpp"
-#include "core/Component.hpp"
+#include "api/smhi_client.hpp"
+#include "tiles/ForcastUi.hpp"
+#include "tiles/SettingsUi.hpp"
 
-using namespace LVGL_Wrapper;
+#include "tiles/ForcastUi.hpp"
+#include "tiles/HistoryChartUi.hpp"
+#include "tiles/MainUi.hpp"
+#include "tiles/SettingsUi.hpp"
+#include "tiles/WifiUi.hpp"
 
 class TempGUI {
- public:
-  TempGUI() = default;
-  ~TempGUI() = default;
-
-  TempGUI(const TempGUI&) = delete;
-  TempGUI& operator=(const TempGUI&) = delete;
-
-  void create_ui();
-  void update_chart(int new_value);
-
  private:
-  void apply_tile_colors(Widget& tile, Label& label, bool dark);
-  void on_tile2_clicked_member();
-  std::shared_ptr<Tileview> tileview;
+  std::shared_ptr<LVGL_Wrapper::Tileview> m_tileview;
 
-  // Tile 1: Group Info
-  std::shared_ptr<Tile> group_tile;
-  std::shared_ptr<Label> group_label;
+  std::shared_ptr<LVGL_Wrapper::Tile> m_t0_group;
+  std::shared_ptr<MainUi> m_c0_group;
 
-  // Tile 2: Forecast (Container for ForcastUI)
-  std::shared_ptr<Tile> forcast_tile;
-  std::shared_ptr<ForcastUI> forcast_ui;
+  std::shared_ptr<LVGL_Wrapper::Tile> m_t1_forecast;
+  std::shared_ptr<ForcastUI> m_c1_forecast;
 
-  // Tile 3: Chart
-  std::shared_ptr<Tile> chart_tile;
-  std::shared_ptr<Chart> chart;
-  std::shared_ptr<types::ChartSeries> series;
-  std::shared_ptr<Label> chart_label;
-  std::shared_ptr<Slider> chart_slider;
-  std::shared_ptr<Label> chart_slider_label;
-  // Labels under the chart for X-axis (dates / numeric labels)
-  std::vector<std::shared_ptr<Label>> chart_x_labels;
-  // Tick labels below the chart (start / mid / end)
-  std::vector<std::shared_ptr<Label>> chart_tick_labels;
-  // Chart title and y-axis label
-  std::shared_ptr<Label> chart_title;
-  std::shared_ptr<Label> chart_ylabel;
-  // Statistic labels (min / avg / max)
-  std::shared_ptr<Label> chart_stat_min;
-  std::shared_ptr<Label> chart_stat_avg;
-  std::shared_ptr<Label> chart_stat_max;
+  std::shared_ptr<LVGL_Wrapper::Tile> m_t2_chart;
+  std::shared_ptr<HistoryChartUi> m_c2_chart;
 
-  // Store the last loaded forecast data so we can repopulate the chart
-  ForecastSevenDay forecast_data;
-  ObservationSeries observation_data;
-  // External Y buffer used when binding values to LVGL chart via ext_y_array
-  std::vector<int32_t> chart_y_buffer;
+  std::shared_ptr<LVGL_Wrapper::Tile> m_t3_settings;
+  std::shared_ptr<SettingsUi> m_c3_settings;
 
-  // Tile 4: Wifi
-  std::shared_ptr<Tile> wifi_tile;
-  std::shared_ptr<Label> wifi_label;
+  std::shared_ptr<LVGL_Wrapper::Tile> m_t4_wifi;
+  std::shared_ptr<WifiUi> m_c4_wifi;
 
-  // Tile 5: Setting screen
-  std::shared_ptr<Tile> setting_tile;
-  std::shared_ptr<SettingsUI> setting_ui;
+  ForecastSevenDay m_forecast_data;
+  ObservationSeries m_history_data;
 
-  bool wifi_dark = false;
-  // Populate chart using the named parameter (e.g. "Temperature", "Humidity", "Wind Speed")
-  void populate_chart_for_parameter(const MeterologyCode& parameter);
+  void handle_settings_save(const SettingsData& settings);
+  void fetch_forecast(float lat, float lon);
+  void fetch_history(int station_id, MeterologyCode type);
+
+ public:
+  void create_ui();
 };
