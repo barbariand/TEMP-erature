@@ -2,23 +2,21 @@
 #include <memory>
 #include "types/Enums.hpp"
 
-using namespace LVGL_Wrapper; 
+using namespace LVGL_Wrapper;
 
 void ForcastUI::init() {
   set_size(LV_PCT(100), LV_PCT(100));
   lv_obj_set_flex_flow(m_obj, LV_FLEX_FLOW_COLUMN);
-  
-  // Padding runt hela containern
+
   lv_obj_set_style_pad_hor(m_obj, 10, 0);
   lv_obj_set_style_pad_top(m_obj, 10, 0);
-  lv_obj_set_style_pad_gap(m_obj, 10, 0); // Avstånd mellan rubrik och lista
+  lv_obj_set_style_pad_gap(m_obj, 10, 0);
   set_scrollbar_mode(ScrollbarMode::Auto);
 
   items.reserve(7);
 
-  // Rubrik för staden
   city_label = Label::create(*this);
-  city_label->set_text("Loading...") // Visas tills data hämtas
+  city_label->set_text("Loading...")
       .set_style_text_font(&lv_font_montserrat_28)
       .set_width(LV_PCT(100));
 
@@ -26,8 +24,7 @@ void ForcastUI::init() {
 }
 
 void ForcastUI::update(const ForecastSevenDay& data) {
-  
-  // Vi använder const_cast för att komma runt const-felet i ditt API
+
   ForecastSevenDay& non_const_data = const_cast<ForecastSevenDay&>(data);
   const auto& report_list = non_const_data.get_all_mid_day_reports();
 
@@ -53,6 +50,7 @@ void ForcastUI::update(const ForecastSevenDay& data) {
 }
 
 void ForcastUI::set_city(const char* city) {
-  if (!city_label) return;
+  if (!city_label)
+    return;
   city_label->set_text(city);
 }

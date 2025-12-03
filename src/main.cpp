@@ -31,7 +31,7 @@ void loop() {
 //exclude main from testin
 #ifndef PIO_UNIT_TESTING
 int main() {
-
+  delay(1000);
   if (!LittleFS.begin(true)) {
     return 1;
   };
