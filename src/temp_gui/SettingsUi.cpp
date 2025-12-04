@@ -45,7 +45,7 @@ void SettingsUI::init() {
       .set_style_text_font(&lv_font_montserrat_22)
       .set_width(LV_PCT(100));
 
-  // Define cities (example list)
+  // Example city list (adjust as needed)
   city_list = {"Karlskrona", "Stockholm", "Gothenburg", "Malmo", "Uppsala"};
   std::string city_opts;
   for (size_t i = 0; i < city_list.size(); ++i) {
@@ -56,7 +56,6 @@ void SettingsUI::init() {
   city_dropdown = Dropdown::create(*this);
   city_dropdown->set_options(city_opts.c_str()).set_width(LV_PCT(60));
 
-  // Units
   // Parameter selection
   parameter_label = Label::create(*this);
   parameter_label->set_text("Parameter:")
@@ -73,32 +72,78 @@ void SettingsUI::init() {
   parameter_dropdown = Dropdown::create(*this);
   parameter_dropdown->set_options(param_opts.c_str()).set_width(LV_PCT(60));
 
-  // Save button
-  save_button = Button::create(*this);
-  save_button->set_width(LV_PCT(60));
-  auto save_label = Label::create(*save_button);
-  save_label->set_text("Save").center();
+  // Button row container (so Save Default and Reset are side-by-side)
+  auto button_row = Component::create<Component>(*this);
+  button_row->set_width(LV_PCT(100));
+  // Use LVGL flex row on the raw object to place children horizontally
+  lv_obj_set_flex_flow(button_row->raw(), LV_FLEX_FLOW_ROW);
+  lv_obj_set_style_pad_row(button_row->raw(), 8, 0);
 
-  // Load existing values
+  // Save Default button
+  save_button = Button::create(*button_row);
+  save_button->set_width(LV_PCT(46));
+  auto save_label = Label::create(*save_button);
+  save_label->set_text("Save Default").center();
+
+  // Reset button (new)
+  auto reset_button = Button::create(*button_row);
+  reset_button->set_width(LV_PCT(46));
+  auto reset_label = Label::create(*reset_button);
+  reset_label->set_text("Reset").center();
+
+  // Load current values from storage and apply to dropdowns
   load_values();
 
-  save_button->on_clicked([this]() {
+  // Lambda to apply changes immediately to UI (but DO NOT persist to SPIFFS)
+  auto apply_changes = [this]() {
     Settings s;
-    // Read selected city
     uint16_t sel = city_dropdown->get_selected();
     if (sel < city_list.size()) s.city = city_list[sel];
     else s.city = city_list.empty() ? "" : city_list[0];
 
-    // Read selected parameter
+    uint16_t psel = parameter_dropdown->get_selected();
+    if (psel < parameter_list.size()) s.parameter = parameter_list[psel];
+    else s.parameter = parameter_list.empty() ? "" : parameter_list[0];
+
+    // Inform parent UI immediately (do NOT save here)
+    if (on_save_callback) on_save_callback(s);
+  };
+
+  // Attach handlers: dropdown changes apply immediately but do not save to storage
+  city_dropdown->on_value_changed([this, apply_changes]() {
+    apply_changes();
+  });
+
+  parameter_dropdown->on_value_changed([this, apply_changes]() {
+    apply_changes();
+  });
+
+  // Save Default button: persist current selections as startup defaults
+  save_button->on_clicked([this]() {
+    Settings s;
+    uint16_t sel = city_dropdown->get_selected();
+    if (sel < city_list.size()) s.city = city_list[sel];
+    else s.city = city_list.empty() ? "" : city_list[0];
+
     uint16_t psel = parameter_dropdown->get_selected();
     if (psel < parameter_list.size()) s.parameter = parameter_list[psel];
     else s.parameter = parameter_list.empty() ? "" : parameter_list[0];
 
     bool ok = SettingsStorage::save(s);
     if (!ok) {
-      std::cout << "Failed to save settings" << std::endl;
+      std::cout << "Failed to save default settings" << std::endl;
     } else {
+      // Inform parent (optional) that defaults changed
       if (on_save_callback) on_save_callback(s);
     }
+  });
+
+  // Reset button: restore dropdown selections from stored defaults (do not change storage)
+  reset_button->on_clicked([this]() {
+    // Reload values from storage into the dropdowns
+    load_values();
+    // Notify parent about the restored (default) values
+    Settings s = SettingsStorage::load();
+    if (on_save_callback) on_save_callback(s);
   });
 }

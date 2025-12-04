@@ -15,6 +15,7 @@ void setup() {
   amoled = new hal::Display();
   // hal::init runs Serial.begin(115200);
   hal::init(amoled);
+  connect_wifi();
 
   gui = new TempGUI();
   gui->create_ui();

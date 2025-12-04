@@ -30,7 +30,7 @@ void TempGUI::on_tile2_clicked_member() {
   wifi_dark = !wifi_dark;
   if (wifi_tile && wifi_label) {
     apply_tile_colors(*wifi_tile, *wifi_label, wifi_dark);
-    // connect_wifi();
+    connect_wifi();
   }
 }
 
@@ -45,7 +45,7 @@ void TempGUI::create_ui() {
   group_tile = tileview->add_tile(0, 0, Direction::Horizontal);
   if (group_tile) {
     group_label = Label::create(*group_tile);
-    group_label->set_text("Group 15, ver. 0.7")
+    group_label->set_text("Group 15, ver. 0.9")
         .set_style_text_font(&lv_font_montserrat_28)
         .center();
 
