@@ -2,6 +2,7 @@
 #include <HAL.hpp>
 #include <csignal>
 #include <iostream>
+#include "LittleFS.h"
 #include "network/network.hpp"
 #include "temp_gui/Temp_gui.hpp"
 // statics
@@ -11,6 +12,7 @@ volatile sig_atomic_t exit_flag = 0;
 
 // Must have function: Setup is run once on startup
 void setup() {
+  LittleFS.begin(true);
   std::cout << "start" << std::endl;
   amoled = new hal::Display();
   // hal::init runs Serial.begin(115200);
@@ -26,7 +28,6 @@ void loop() {
   //wifi_reconnect_backoff();
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
-
 }
 //exclude main from testin
 #ifndef PIO_UNIT_TESTING

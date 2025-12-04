@@ -1,15 +1,17 @@
 #pragma once
 
-#include <string>
-#include "api/parameters/MeterologyCode.hpp"
 #include <ArduinoJson.h>
+#include <string>
+#include "api/cities.hpp"
+#include "api/parameters/MeterologyCode.hpp"
 
 struct Settings {
-  std::string city;
-  MeterologyCode parameter = MeterologyCode::AirTemperature_DailyMean; // e.g. "Temperature", "Humidity", "Wind Speed"
+  std::string city = kKnownCities[0].name;
+  MeterologyCode parameter = MeterologyCode::
+      AirTemperature_DailyMean;  // e.g. "Temperature", "Humidity", "Wind Speed"
 };
 
 namespace SettingsStorage {
 Settings load();
 bool save(const Settings& s);
-} // namespace SettingsStorage
+}  // namespace SettingsStorage

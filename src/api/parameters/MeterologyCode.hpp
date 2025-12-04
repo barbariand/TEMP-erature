@@ -189,7 +189,7 @@ struct MeterologyCode {
   Type value;
 
  public:
-  bool operator!() { return value != Type::Unknown_Parameter; }
+  bool operator!() { return value == Type::Unknown_Parameter; }
   MeterologyCode(Type t = Unknown_Parameter) : value(t) {}
   explicit MeterologyCode(int code);
 

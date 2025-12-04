@@ -77,4 +77,4 @@ monitor:
 
 # Builds the ESP32 target, uploads it, and starts the serial monitor.
 [linux]
-deploy: build-esp32 upload monitor
+deploy: upload monitor

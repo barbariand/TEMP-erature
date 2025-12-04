@@ -20,6 +20,7 @@
 
 using namespace LVGL_Wrapper;
 
+const int VIEW_SIZE = 30;
 static lv_obj_t* g_xaxis_cont = nullptr;
 
 void TempGUI::apply_tile_colors(Widget& tile, Label& label, bool dark) {
@@ -109,7 +110,7 @@ void TempGUI::create_ui() {
     chart = Chart::create(*chart_tile);
     chart->set_width(LV_PCT(100));
     chart->set_height(LV_PCT(40));
-    chart->set_type(LV_CHART_TYPE_LINE).set_point_count(7);
+    chart->set_type(LV_CHART_TYPE_LINE).set_point_count(VIEW_SIZE);
     chart->set_style_bg_color(Color::White);
     lv_obj_set_style_size(chart->raw(), 4, 4, LV_PART_INDICATOR);
 
@@ -211,7 +212,10 @@ void TempGUI::create_ui() {
       bool city_found = false;
       std::string search_city = s.city;
 
+      std::cout << "[DEBUG] checking " << search_city << std::endl;
       for (const auto& c : kKnownCities) {
+
+        std::cout << "[DEBUG] checking " << c.name << std::endl;
         if (search_city == c.name) {
           city_found = true;
           ArduinoJson::JsonDocument doc;
@@ -228,14 +232,49 @@ void TempGUI::create_ui() {
           } else {
             std::cout << "[DEBUG] API FAILED! Check WiFi." << std::endl;
           }
+          ObservationSeries out2;
+          StationsLatestMonthsParameters param2;
+          param2.meterology = s.parameter;
+          param2.station = c.station;
+          if (fetch_latest_months(param2, out2)) {
+            this->observation_data = out2;
+            std::cout << "[DEBUG] API Fetch Success!" << std::endl;
+          } else {
+            std::cout << "[DEBUG] API FAILED! Check WiFi." << std::endl;
+          }
           if (forcast_ui)
             forcast_ui->update(forecast_data);
           this->populate_chart_for_parameter(s.parameter);
           break;
         }
       }
-      if (!city_found)
-        std::cout << "[DEBUG] City not found in list." << std::endl;
+      if (!city_found) {
+        CityInfo c = kKnownCities[0];
+        SevenDayForcastParameters param;
+        param.location.lat = c.lat;
+        param.location.lon = c.lon;
+        ForecastSevenDay out;
+        if (fetch_seven_day_forecast(param, out)) {
+          forecast_data = out;
+          std::cout << "[DEBUG] API Fetch Success!" << std::endl;
+        } else {
+          std::cout << "[DEBUG] API FAILED! Check WiFi." << std::endl;
+        }
+
+        ObservationSeries out2;
+        StationsLatestMonthsParameters param2;
+        param2.meterology = s.parameter;
+        param2.station = c.station;
+        if (fetch_latest_months(param2, out2)) {
+          this->observation_data = out2;
+          std::cout << "[DEBUG] API Fetch Success!" << std::endl;
+        } else {
+          std::cout << "[DEBUG] API FAILED! Check WiFi." << std::endl;
+        }
+        if (forcast_ui)
+          forcast_ui->update(forecast_data);
+        this->populate_chart_for_parameter(s.parameter);
+      }
     };
   }
 
@@ -276,7 +315,6 @@ void TempGUI::update_chart(int new_value) {
   if (chart && series)
     chart->set_next_value(*series, new_value);
 }
-
 void TempGUI::populate_chart_for_parameter(const MeterologyCode& parameter) {
 
   MeterologyCodeInfo info = parameter.toInfo();
@@ -295,7 +333,7 @@ void TempGUI::populate_chart_for_parameter(const MeterologyCode& parameter) {
     }
     if (chart && series) {
 
-      for (int i = 0; i < 7; i++)
+      for (int i = 0; i < VIEW_SIZE; i++)
         chart->set_next_value(*series, LV_CHART_POINT_NONE);
     }
 
@@ -311,7 +349,7 @@ void TempGUI::populate_chart_for_parameter(const MeterologyCode& parameter) {
     return;
   }
 
-  const int view_width = 7;
+  const int view_width = VIEW_SIZE;
   int total_points = static_cast<int>(all_points.size());
   int max_scroll_idx =
       (total_points > view_width) ? (total_points - view_width) : 0;
@@ -373,12 +411,14 @@ void TempGUI::populate_chart_for_parameter(const MeterologyCode& parameter) {
 
       if (g_xaxis_cont) {
         lv_obj_t* lbl = lv_label_create(g_xaxis_cont);
-        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_28, 0);
+        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_12, 0);
 
-        char date_buf[16];
+        char date_buf[32];
 
-        snprintf(date_buf, sizeof(date_buf), "%d/%d", view_dates[i].day,
-                 view_dates[i].month);
+        snprintf(date_buf, sizeof(date_buf), "%d/%d\n%02d:%02d",
+                 view_dates[i].day, view_dates[i].month,
+                 view_dates[i].hour,     // check your struct member names
+                 view_dates[i].minute);  // check your struct member names
         lv_label_set_text(lbl, date_buf);
       }
     }
