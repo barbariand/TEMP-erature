@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include "api/parameters/MeterologyCode.hpp"
 using namespace ArduinoJson;
 using namespace std;
 
@@ -34,7 +35,7 @@ Settings load() {
   if (doc.containsKey("city"))
     s.city = doc["city"].as<const char*>();
   if (doc.containsKey("parameter"))
-    s.parameter = doc["parameter"].as<const char*>();
+    s.parameter = MeterologyCode(doc["parameter"].as<int>());
 
   return s;
 }
@@ -45,7 +46,7 @@ bool save(const Settings& s) {
 
   JsonDocument doc;
   doc["city"] = s.city.c_str();
-  doc["parameter"] = s.parameter.c_str();
+  doc["parameter"] = (int)s.parameter.value;
 
   File f = LittleFS.open(SETTINGS_PATH, FILE_WRITE);
   if (!f)

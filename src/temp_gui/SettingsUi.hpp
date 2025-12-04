@@ -22,6 +22,7 @@ class SettingsUI : public Component {
 
   // Save button
   std::shared_ptr<Button> save_button;
+  std::shared_ptr<Button> reset_button;
 
  public:
   std::vector<std::string> city_list;
