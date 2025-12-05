@@ -108,12 +108,22 @@ void TempGUI::create_ui() {
   // Wire settings save callback to apply immediately to Forecast and Chart
   if (setting_ui) {
     setting_ui->on_save_callback = [this](const Settings& s) {
+      // Update city label on forecast tile
       if (forcast_ui && !s.city.empty()) {
         forcast_ui->set_city(s.city.c_str());
       }
+      // Update chart label for parameter
       if (chart_label) {
         std::string lbl = std::string("Parameter: ") + s.parameter;
         chart_label->set_text(lbl.c_str());
+      }
+
+      // Fetch forecast data from API for the newly selected city
+      {
+        ForecastSevenDay data = fetch_forecast_for_city(s.city.c_str());
+        if (forcast_ui) {
+          forcast_ui->update(data);
+        }
       }
     };
   }
