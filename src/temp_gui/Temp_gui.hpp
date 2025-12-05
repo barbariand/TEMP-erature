@@ -2,8 +2,8 @@
 #include <GUI.hpp>
 #include <memory>
 #include <vector>
-#include "ForcastUi.hpp"
-#include "SettingsUi.hpp"
+#include "tiles/ForcastUi.hpp"
+#include "tiles/SettingsUi.hpp"
 #include "api/api.hpp"
 #include "api/data/ObservationSeries.hpp"
 #include "api/parameters/MeterologyCode.hpp"
