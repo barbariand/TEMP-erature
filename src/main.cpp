@@ -12,6 +12,10 @@ volatile sig_atomic_t exit_flag = 0;
 
 // Must have function: Setup is run once on startup
 void setup() {
+  if (!LittleFS.begin()) {
+  Serial.println("LittleFS mount failed!");
+}
+
   std::cout << "start" << std::endl;
   amoled = new hal::Display();
   // hal::init runs Serial.begin(115200);

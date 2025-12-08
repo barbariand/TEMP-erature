@@ -15,7 +15,9 @@ namespace SettingsStorage {
 Settings load(bool retry) {
   Settings s;
 
-  s.city = kKnownCities[0].station;
+  s.city = 65090;
+  s.parameter = MeterologyCode::AirTemperature_DailyMean;
+
   if (!LittleFS.exists(SETTINGS_PATH)) {
     std::cout << "File does not exist can not load" << std::endl;
     return s;
