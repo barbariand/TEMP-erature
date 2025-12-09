@@ -9,6 +9,11 @@
 static TempGUI* gui;
 static hal::Display* amoled;
 volatile sig_atomic_t exit_flag = 0;
+volatile bool settingsDirty = false;
+volatile bool fetchRequested = false;
+volatile bool fetchInProgress = false;
+unsigned long lastFetchMs =0;
+const unsigned long fetchDebounceMs = 2000;
 
 // Must have function: Setup is run once on startup
 void setup() {
@@ -32,6 +37,7 @@ void loop() {
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
 }
+
 //exclude main from testin
 #ifndef PIO_UNIT_TESTING
 int main() {

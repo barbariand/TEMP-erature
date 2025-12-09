@@ -9,6 +9,7 @@
 #include "api/smhi_client.hpp"
 #include "tiles/ForcastUi.hpp"
 #include "tiles/SettingsUi.hpp"
+#include <atomic>
 
 #include "tiles/ForcastUi.hpp"
 #include "tiles/HistoryChartUi.hpp"
@@ -42,6 +43,20 @@ class TempGUI {
   void fetch_forecast(float lat, float lon);
   void fetch_history(int station_id, MeterologyCode type);
 
+  std::atomic<bool> m_fetchRequested{false};
+  std::atomic<bool> m_fetchInProgress{false};
+  float m_pendingLat{0.0f};
+  float m_pendingLon{0.0f};
+  int m_pendingStationId{0};
+  MeterologyCode m_pendingParam{MeterologyCode::AirTemperature_Momentary};
+
+  // NEW: task starter och entry
+  void start_fetch_task();
+  static void fetch_task_entry(void* pvParameters);
+  static void async_update_ui(void* user_data);
+
  public:
   void create_ui();
+  void request_fetch(float lat, float lon, int station_id,
+                     MeterologyCode parameter);
 };
