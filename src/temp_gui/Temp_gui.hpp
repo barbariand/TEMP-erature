@@ -50,13 +50,15 @@ class TempGUI {
   int m_pendingStationId{0};
   MeterologyCode m_pendingParam{MeterologyCode::AirTemperature_Momentary};
 
-  // NEW: task starter och entry
   void start_fetch_task();
   static void fetch_task_entry(void* pvParameters);
   static void async_update_ui(void* user_data);
 
  public:
-  void create_ui();
-  void request_fetch(float lat, float lon, int station_id,
+    void create_ui();
+    void request_fetch(float lat, float lon, int station_id,
                      MeterologyCode parameter);
+    void go_to_settings_tile();
 };
+
+extern TempGUI* g_temp_gui_instance;

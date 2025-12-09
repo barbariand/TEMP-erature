@@ -23,6 +23,8 @@
 
 using namespace LVGL_Wrapper;
 
+TempGUI* g_temp_gui_instance = nullptr;
+
 struct UpdatePayload {
   TempGUI* gui;
   bool forecast_ok;
@@ -73,6 +75,8 @@ void TempGUI::create_ui() {
 
   m_t3_settings = m_tileview->add_tile(3, 0, Direction::Horizontal);
   m_c3_settings = Component::create<SettingsUi>(*m_t3_settings);
+
+  g_temp_gui_instance = this;
 
   if (m_c3_settings) {
     m_c3_settings->on_save = [this](const SettingsData& s) {
@@ -253,4 +257,11 @@ void TempGUI::fetch_forecast(float lat, float lon) {
   } else {
     std::cout << "[TempGUI] Forecast fetch failed." << std::endl;
   }
+}
+
+void TempGUI::go_to_settings_tile() {
+  // Kontrollera att tileview finns
+  if (!m_tileview) return;
+
+  m_tileview->go_to(3, 0, true);
 }
