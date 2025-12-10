@@ -1,19 +1,20 @@
 #include "SettingsUi.hpp"
+#include "temp_gui/settings_storage.hpp"
 #include <ArduinoJson.h>
 #include <iostream>
 
 void SettingsUI::load_values() {
-  UserPrefs prefs = SettingsStorage::load();
+  Settings prefs = SettingsStorage::load();
   // Sätt stad
-  for (size_t i = 0; i < Cities.size(); ++i) {
-    if (Cities[i].stationId == prefs.chosenId) {
+  for (size_t i = 0; i < kKnownCities.size(); ++i) {
+    if (kKnownCities[i].station == prefs.city) {
       place_dropdown->set_selected(i);
       break;
     }
   }
   // Sätt parameter
   for (size_t i = 0; i < metric_list.size(); ++i) {
-    if (metric_list[i] == prefs.chosenMetric) {
+    if (metric_list[i] == prefs.parameter) {
       metric_dropdown->set_selected(i);
       break;
     }
@@ -38,7 +39,7 @@ void SettingsUI::init() {
       .set_width(LV_PCT(100));
 
   std::string place_opts;
-  for (auto& c : Cities) {
+  for (auto& c : kKnownCities) {
     place_opts += c.name;
     place_opts += "\n";
   }
@@ -78,18 +79,15 @@ void SettingsUI::init() {
   load_values();
 
   save_button->on_clicked([this]() {
-    UserPrefs prefs;
+    Settings prefs;
     uint16_t sel = place_dropdown->get_selected();
-    if (sel < Cities.size()) {
-      prefs.chosenPlace = Cities[sel].name;
-      prefs.chosenId    = Cities[sel].stationId;
-      prefs.chosenLat   = Cities[sel].latitude;
-      prefs.chosenLon   = Cities[sel].longitude;
+    if (sel < kKnownCities.size()) {
+      prefs.city = kKnownCities[sel].station;
     }
 
     uint16_t psel = metric_dropdown->get_selected();
     if (psel < metric_list.size()) {
-      prefs.chosenMetric = metric_list[psel];
+      prefs.parameter = metric_list[psel];
     }
 
     bool ok = SettingsStorage::save(prefs);
