@@ -116,21 +116,39 @@ void SettingsUi::init() {
                         LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_gap(btn_cont->raw(), 10, 0);
 
+  // Save knapp
   m_save_btn = Button::create(*btn_cont);
-  m_save_btn->set_width(LV_PCT(48))
-      .set_height(50)
+  m_save_btn->set_width(LV_PCT(24))
+      .set_height(25)
       .set_style_bg_color(Color::from_rgb(33, 150, 243));
 
   auto save_lbl = Label::create(*m_save_btn);
   save_lbl->set_text("Save").center();
-
+  // Load knapp
   m_load_btn = Button::create(*btn_cont);
-  m_load_btn->set_width(LV_PCT(48))
-      .set_height(50)
+  m_load_btn->set_width(LV_PCT(24))
+      .set_height(25)
       .set_style_bg_color(Color::from_rgb(33, 150, 243));
 
   auto load_lbl = Label::create(*m_load_btn);
   load_lbl->set_text("Load").center();
+
+  // Reset knapp
+  m_reset_btn = Button::create(*btn_cont);
+  m_reset_btn->set_width(LV_PCT(24))
+      .set_height(25)
+      .set_style_bg_color(Color::from_rgb(244, 67, 54));
+
+  auto reset_lbl = Label::create(*m_reset_btn);
+  reset_lbl->set_text("Reset").center();
+
+  m_reset_btn->on_clicked([this]() {
+    m_current_settings.city = 65090;  // Karlskrona
+    m_current_settings.parameter = MeterologyCode::AirTemperature_DailyMean;
+
+    SettingsStorage::save(m_current_settings);
+    load_values_to_ui();
+  });
 
   load_values_to_ui();
 

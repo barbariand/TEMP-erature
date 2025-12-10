@@ -31,6 +31,7 @@ class SettingsUi : public Component {
 
   std::shared_ptr<Button> m_save_btn;
   std::shared_ptr<Button> m_load_btn;
+  std::shared_ptr<Button> m_reset_btn;
 
   void dispatch_if_changed();
 

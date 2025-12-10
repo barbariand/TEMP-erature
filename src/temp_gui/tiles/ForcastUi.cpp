@@ -1,6 +1,7 @@
 #include "ForcastUi.hpp"
 #include <memory>
 #include "types/Enums.hpp"
+#include "temp_gui/Temp_gui.hpp"
 
 using namespace LVGL_Wrapper;
 
@@ -21,6 +22,19 @@ void ForcastUI::init() {
       .set_width(LV_PCT(100));
 
   city_label->set_style_text_align(LV_TEXT_ALIGN_CENTER);
+
+  lv_obj_t* btn = lv_btn_create(m_obj);
+  lv_obj_set_size(btn, 36, 36);
+  lv_obj_align(btn, LV_ALIGN_TOP_RIGHT, -8, 8);
+  lv_obj_move_foreground(btn);
+
+  lv_obj_t* lbl = lv_label_create(btn);
+  lv_label_set_text(lbl, LV_SYMBOL_SETTINGS);
+  lv_obj_center(lbl);
+
+  lv_obj_add_event_cb(btn, [](lv_event_t*){
+    if (g_temp_gui_instance) g_temp_gui_instance->go_to_settings_tile();
+  }, LV_EVENT_CLICKED, nullptr);
 }
 
 void ForcastUI::update(const ForecastSevenDay& data) {

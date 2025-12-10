@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include <iostream>
+#include "temp_gui/Temp_gui.hpp"
 
 using namespace LVGL_Wrapper;
 
@@ -88,6 +89,19 @@ void HistoryChartUi::init() {
   m_slider->set_range(0, 0);
 
   m_slider->on_value_changed([this]() { refresh_chart_view(); });
+
+    lv_obj_t* btn = lv_btn_create(m_obj);
+  lv_obj_set_size(btn, 36, 36);
+  lv_obj_align(btn, LV_ALIGN_TOP_RIGHT, -8, 8);
+  lv_obj_move_foreground(btn);
+
+  lv_obj_t* lbl = lv_label_create(btn);
+  lv_label_set_text(lbl, LV_SYMBOL_SETTINGS);
+  lv_obj_center(lbl);
+
+  lv_obj_add_event_cb(btn, [](lv_event_t*){
+    if (g_temp_gui_instance) g_temp_gui_instance->go_to_settings_tile();
+  }, LV_EVENT_CLICKED, nullptr);
 }
 
 

@@ -4,6 +4,9 @@
 #include <cmath>
 #include <ctime>
 #include <iostream>
+#include <atomic>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include "api/cities.hpp"
 #include "api/data/DataPoint.hpp"
@@ -19,6 +22,40 @@
 #include "types/Enums.hpp"
 
 using namespace LVGL_Wrapper;
+
+TempGUI* g_temp_gui_instance = nullptr;
+
+struct UpdatePayload {
+  TempGUI* gui;
+  bool forecast_ok;
+  bool history_ok;
+  MeterologyCode param;
+};
+
+// Temp_gui.cpp — implementera som statisk medlemsfunktion
+void TempGUI::async_update_ui(void* user_data) {
+  UpdatePayload* p = static_cast<UpdatePayload*>(user_data);
+  if (!p) return;
+  TempGUI* gui = p->gui;
+
+  if (p->forecast_ok) {
+    if (gui->m_c1_forecast) gui->m_c1_forecast->update(gui->m_forecast_data);
+    std::cout << "[TempGUI] Forecast updated (async)." << std::endl;
+  } else {
+    std::cout << "[TempGUI] Forecast not available (async)." << std::endl;
+  }
+
+  if (p->history_ok) {
+    if (gui->m_c2_chart) gui->m_c2_chart->update_data(gui->m_history_data, p->param.toInfo().name);
+    std::cout << "[TempGUI] History updated (async)." << std::endl;
+  } else {
+    if (gui->m_c2_chart) gui->m_c2_chart->set_error("History Fetch Error");
+    std::cout << "[TempGUI] History fetch failed (async)." << std::endl;
+  }
+
+  delete p;
+}
+
 
 void TempGUI::create_ui() {
   auto screen = Screen::getInstance();
@@ -38,6 +75,8 @@ void TempGUI::create_ui() {
 
   m_t3_settings = m_tileview->add_tile(3, 0, Direction::Horizontal);
   m_c3_settings = Component::create<SettingsUi>(*m_t3_settings);
+
+  g_temp_gui_instance = this;
 
   if (m_c3_settings) {
     m_c3_settings->on_save = [this](const SettingsData& s) {
@@ -91,10 +130,101 @@ void TempGUI::handle_settings_save(const SettingsData& settings) {
     m_c1_forecast->set_city(city_name.c_str());
   }
 
-  fetch_forecast(lat, lon);
-
-  fetch_history(station_id, settings.parameter);
+  request_fetch(lat, lon, station_id, settings.parameter);
 }
+
+void TempGUI::request_fetch(float lat, float lon, int station_id, MeterologyCode param_code) {
+
+  m_pendingLat = lat;
+  m_pendingLon = lon;
+  m_pendingStationId = station_id;
+  m_pendingParam = param_code;
+  m_fetchRequested.store(true);
+
+  if (!m_fetchInProgress.load()) {
+    start_fetch_task();
+  }
+}
+
+void TempGUI::start_fetch_task() {
+
+  bool expected = false;
+  if (!m_fetchInProgress.compare_exchange_strong(expected, true)) {
+    return;
+  }
+    BaseType_t res = xTaskCreatePinnedToCore(
+    TempGUI::fetch_task_entry,
+    "TempFetchTask",
+    12 * 1024 / sizeof(StackType_t), 
+    this,
+    1,
+    NULL,
+    1 
+  );
+
+  if (res != pdPASS) {
+    std::cout << "[TempGUI] Failed to create fetch task" << std::endl;
+    m_fetchInProgress.store(false);
+  }
+}
+
+void TempGUI::fetch_task_entry(void* pvParameters) {
+  TempGUI* self = static_cast<TempGUI*>(pvParameters);
+  if (!self) {
+    vTaskDelete(NULL);
+    return;
+  }
+
+  // Ta en snapshot av pending data
+  float lat = self->m_pendingLat;
+  float lon = self->m_pendingLon;
+  int station_id = self->m_pendingStationId;
+  MeterologyCode param_code = self->m_pendingParam;
+
+  // Vi hanterar denna request nu
+  self->m_fetchRequested.store(false);
+
+  std::cout << "[TempGUI] Fetch task started. Station: " << station_id << std::endl;
+
+  // Kör dina befintliga fetch-funktioner i tasken (synkront här)
+  SevenDayForcastParameters forecastParam;
+  forecastParam.location.lat = lat;
+  forecastParam.location.lon = lon;
+
+  bool forecast_ok = false;
+  bool history_ok = false;
+
+  try {
+    forecast_ok = fetch_seven_day_forecast(forecastParam, self->m_forecast_data);
+  } catch (...) {
+    forecast_ok = false;
+    std::cout << "[TempGUI] Exception during fetch_seven_day_forecast" << std::endl;
+  }
+
+  StationsLatestMonthsParameters history_params;
+  history_params.station = station_id;
+  history_params.meterology = param_code;
+  try {
+    history_ok = fetch_latest_months(history_params, self->m_history_data);
+  } catch (...) {
+    history_ok = false;
+    std::cout << "[TempGUI] Exception during fetch_latest_months" << std::endl;
+  }
+
+  std::cout << "[TempGUI] Fetch task finished network calls. forecast_ok=" << forecast_ok
+            << " history_ok=" << history_ok << std::endl;
+
+  // Skapa payload och anropa den statiska async‑wrappern (async_update_ui)
+  UpdatePayload* payload = new UpdatePayload{ self, forecast_ok, history_ok, param_code };
+  lv_async_call(async_update_ui, payload);
+
+  // Markera klar
+  self->m_fetchInProgress.store(false);
+
+  // Avsluta tasken
+  vTaskDelete(NULL);
+}
+
 
 void TempGUI::fetch_history(int station_id, MeterologyCode param_code) {
   StationsLatestMonthsParameters history_params;
@@ -127,4 +257,11 @@ void TempGUI::fetch_forecast(float lat, float lon) {
   } else {
     std::cout << "[TempGUI] Forecast fetch failed." << std::endl;
   }
+}
+
+void TempGUI::go_to_settings_tile() {
+  // Kontrollera att tileview finns
+  if (!m_tileview) return;
+
+  m_tileview->go_to(3, 0, true);
 }
