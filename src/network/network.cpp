@@ -37,6 +37,11 @@ void print_wifi_error(wl_status_t status) {
 
 // Function: Connects to WIFI
 bool connect_wifi() {
+  // Check if already connected
+  if (WiFi.status() == WL_CONNECTED) {
+    return true;
+  }
+  
   std::cout << "Connecting to WiFi SSID: " << WIFI_SSID << std::endl;
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
