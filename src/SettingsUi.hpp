@@ -1,7 +1,8 @@
 #pragma once
 #include <GUI.hpp>
 #include "userprefs.hpp"
-#include "Cities.hpp"
+#include "api/Cities.hpp"
+#include "temp_gui/settings_storage.hpp"
 
 using namespace LVGL_Wrapper;
 
@@ -21,7 +22,7 @@ class SettingsUI : public Component {
   std::shared_ptr<Button> save_button;
 
  public:
-  std::function<void(const UserPrefs&)> on_save_callback;
+  std::function<void(const Settings&)> on_save_callback;
   void init() override;
   void load_values();
   explicit SettingsUI(BaseWidget* parent) : Component(parent) {}

@@ -17,16 +17,27 @@ bool fetch_from_url(const String& url, ArduinoJson::JsonDocument& outDoc) {
   std::cout << "Fetching url " << url.c_str() << std::endl;
   HTTPClient http;
   http.setTimeout(10000);
+  http.setConnectTimeout(5000);
+  
+  // Disable SSL certificate verification for HTTPS (use with caution in production)
   http.begin(url);
+  
   int code = http.GET();
+  std::cout << "HTTP response code: " << code << std::endl;
+  
   if (code != HTTP_CODE_OK) {
-    http.end();
     std::cout << "SMHI fetch failed, HTTP code: " << code << std::endl;
+    http.end();
     return false;
   }
 
   String payload = http.getString();
   http.end();
+
+  if (payload.length() == 0) {
+    std::cout << "Empty response payload" << std::endl;
+    return false;
+  }
 
   DeserializationError err = ArduinoJson::deserializeJson(outDoc, payload);
   if (err) {

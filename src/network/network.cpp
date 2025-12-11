@@ -37,6 +37,11 @@ void print_wifi_error(wl_status_t status) {
 
 // Function: Connects to WIFI
 bool connect_wifi() {
+  // Check if already connected
+  if (WiFi.status() == WL_CONNECTED) {
+    return true;
+  }
+  
   std::cout << "Connecting to WiFi SSID: " << WIFI_SSID << std::endl;
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -52,6 +57,13 @@ bool connect_wifi() {
     // WiFi.localIP() returns an object, so we convert to string for std::cout
     std::cout << "IP address: " << WiFi.localIP().toString().c_str()
               << std::endl;
+    
+    // Set explicit DNS servers to resolve domain names
+    IPAddress dns1(8, 8, 8, 8);        // Google DNS 1
+    IPAddress dns2(8, 8, 4, 4);        // Google DNS 2
+    WiFi.config(WiFi.localIP(), WiFi.gatewayIP(), WiFi.subnetMask(), dns1, dns2);
+    std::cout << "DNS servers configured." << std::endl;
+    
     return true;
   } else {
     std::cout << "WiFi could not connect (timeout)." << std::endl;
@@ -85,6 +97,13 @@ void wifi_reconnect_backoff() {
 
   if (WiFi.status() == WL_CONNECTED) {
     std::cout << "WiFi reconnected." << std::endl;
+    
+    // Set explicit DNS servers to resolve domain names
+    IPAddress dns1(8, 8, 8, 8);        // Google DNS 1
+    IPAddress dns2(8, 8, 4, 4);        // Google DNS 2
+    WiFi.config(WiFi.localIP(), WiFi.gatewayIP(), WiFi.subnetMask(), dns1, dns2);
+    std::cout << "DNS servers configured." << std::endl;
+    
     wifi_backoff_ms = 5000;
     wifi_next_attempt = now + 10000;
   } else {
