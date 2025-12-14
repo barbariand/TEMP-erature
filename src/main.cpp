@@ -12,14 +12,15 @@ volatile sig_atomic_t exit_flag = 0;
 volatile bool settingsDirty = false;
 volatile bool fetchRequested = false;
 volatile bool fetchInProgress = false;
-unsigned long lastFetchMs =0;
+unsigned long lastFetchMs = 0;
 const unsigned long fetchDebounceMs = 2000;
 
 // Must have function: Setup is run once on startup
 void setup() {
   if (!LittleFS.begin()) {
-  Serial.println("LittleFS mount failed!");
-}
+    Serial.println("LittleFS mount failed!");
+    return;
+  }
 
   std::cout << "start" << std::endl;
   amoled = new hal::Display();
@@ -33,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-  //wifi_reconnect_backoff();
+  wifi_reconnect_backoff();
   int sleep_delay = lv_timer_handler();
   hal::sleep(sleep_delay);
 }
